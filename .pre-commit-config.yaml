@@ -1,0 +1,49 @@
+repos:
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: detect-private-key
+
+  # Ruff — fast linter + formatter (replaces flake8/pyflakes/isort/pyupgrade)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
+      - id: ruff-format
+
+  # Black — Python formatter
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3.9
+
+  # Secrets detection (disabled - requires proper baseline setup)
+  # - repo: https://github.com/Yelp/detect-secrets
+  #   rev: v1.5.0
+  #   hooks:
+  #     - id: detect-secrets
+  #       args: ["--baseline", ".secrets.baseline"]
+  #       exclude: ".env.example"
+
+  # Pyright — type checking (runs only on staged files for speed)
+  # Note: Requires pyright to be installed globally or in PATH
+  # - repo: local
+  #   hooks:
+  #     - id: pyright
+  #       name: pyright
+  #       language: system
+  #       entry: pyright
+  #       types: [python]
+  #       pass_filenames: false

@@ -1,0 +1,52 @@
+# .qode.toml — default Qode configuration
+# Overrides are applied in order: defaults → .qode.toml → CLI flags → env vars.
+
+[llm]
+default_model = "gemini/gemini-2.0-flash"
+# alternative: "openai/gpt-4o", "openai/gpt-4o-mini", "ollama/llama3.1"
+timeout_seconds = 120
+max_retries = 3
+
+[llm.rate_limits]
+# Free-tier Gemini 2.0 Flash defaults
+requests_per_minute = 15
+tokens_per_minute = 1_000_000
+
+[database]
+# Directory where KuzuDB stores its files (relative to analyzed project root)
+db_dir = ".qode_db"
+
+[server]
+port = 3000
+host = "127.0.0.1"
+open_browser = true
+
+[analysis]
+# Languages to parse (subset of 12 supported languages)
+languages = [
+    "python", "javascript", "typescript",
+    "java", "go", "rust", "c", "cpp",
+    "ruby", "php", "swift", "kotlin",
+]
+# Max parallel processes for parsing (0 = auto-detect CPU count)
+max_workers = 0
+# Skip embedding generation (faster but disables semantic search)
+skip_embeddings = false
+
+[agents]
+# Enable/disable individual agents
+explorer   = true
+analyst    = true
+security   = true
+test       = true
+documenter = true
+
+[ci]
+# Defaults for qode gate command
+max_debt_score = 70
+max_critical_findings = 0
+output_format = "json"  # json | sarif | markdown
+
+[output]
+# Default export format for qode docs / qode audit
+format = "markdown"  # markdown | html | json | sarif

@@ -1,0 +1,72 @@
+# .qodeignore — patterns to exclude from Qode analysis
+# Same syntax as .gitignore
+
+# Version control
+.git/
+.svn/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Node / Frontend
+node_modules/
+.next/
+.nuxt/
+dist/
+.output/
+
+# Qode's own database (don't analyze yourself)
+.qode_db/
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Compiled / generated artifacts
+*.min.js
+*.min.css
+*.map
+*.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+poetry.lock
+uv.lock
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# Binary / media files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.pdf
+*.zip
+*.tar.gz
+*.gz

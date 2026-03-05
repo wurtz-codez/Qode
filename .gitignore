@@ -1,0 +1,47 @@
+# .gitignore for Qode
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# Secrets — NEVER commit these
+.env
+.env.local
+.env.*.local
+.secrets.baseline
+
+# Qode runtime data
+.qode_db/
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.ruff_cache/
+
+# Node / Frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Misc
+*.log
