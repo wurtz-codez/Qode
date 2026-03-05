@@ -17,8 +17,11 @@ console = Console()
 
 @app.callback(invoke_without_command=True)
 def main(
-    version: bool = typer.Option(  # noqa: FBT001
-        False, "--version", "-v", help="Show version and exit."
+    version: bool = typer.Option(
+        False,
+        "--version",
+        "-v",
+        help="Show version and exit.",
     ),
 ) -> None:
     """Qode — code archaeology and intelligence, entirely on your machine."""
@@ -32,8 +35,8 @@ def main(
 # ---------------------------------------------------------------------------
 # Register sub-commands (will be populated in later phases)
 # ---------------------------------------------------------------------------
-# from qode.cli.commands.analyze import analyze_cmd  # noqa: ERA001
-# app.add_typer(analyze_cmd, name="analyze")         # noqa: ERA001
+# from qode.cli.commands.analyze import analyze_cmd
+# app.add_typer(analyze_cmd, name="analyze")
 
 
 if __name__ == "__main__":

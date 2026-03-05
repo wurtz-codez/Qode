@@ -37,13 +37,12 @@ repos:
   #       args: ["--baseline", ".secrets.baseline"]
   #       exclude: ".env.example"
 
-  # Pyright — type checking (runs only on staged files for speed)
-  # Note: Requires pyright to be installed globally or in PATH
-  # - repo: local
-  #   hooks:
-  #     - id: pyright
-  #       name: pyright
-  #       language: system
-  #       entry: pyright
-  #       types: [python]
-  #       pass_filenames: false
+  # Pyright — type checking (runs on all staged Python files)
+  - repo: local
+    hooks:
+      - id: pyright
+        name: pyright
+        language: system
+        entry: .venv/bin/pyright
+        types: [python]
+        pass_filenames: false

@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+# Cancel in-progress runs for the same branch/PR (saves CI minutes)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─────────────────────────────────────────────────────────
+  # Lint — ruff (check + format) on Python 3.11
+  # ─────────────────────────────────────────────────────────
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dev dependencies
+        run: pip install -e ".[dev]"
+
+      - name: ruff check (lint)
+        run: ruff check src tests --output-format=github
+
+      - name: ruff format (check only — no writes)
+        run: ruff format --check src tests
+
+      - name: Write lint summary
+        if: success()
+        run: |
+          echo "### ✅ Lint Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ruff check\` — 0 lint errors" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ruff format --check\` — formatting is consistent" >> $GITHUB_STEP_SUMMARY
+
+  # ─────────────────────────────────────────────────────────
+  # Type-check — pyright on Python 3.11
+  # ─────────────────────────────────────────────────────────
+  typecheck:
+    name: Type Check (pyright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dev dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run pyright
+        # pyright exits 1 automatically if there are type errors — no JSON parsing needed
+        run: pyright
+
+      - name: Write type-check summary
+        if: success()
+        run: |
+          echo "### ✅ Type Check Passed" >> $GITHUB_STEP_SUMMARY
+          echo "pyright reported 0 errors." >> $GITHUB_STEP_SUMMARY
+
+  # ─────────────────────────────────────────────────────────
+  # Test — pytest on Python 3.9 → 3.12 matrix
+  # ─────────────────────────────────────────────────────────
+  test:
+    name: Test (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install test dependencies
+        run: pip install -e ".[test]"
+
+      - name: Run pytest
+        run: |
+          pytest tests/ -v \
+            --cov=src/qode \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --junitxml=pytest-results.xml
+
+      - name: Upload coverage to summary
+        if: matrix.python-version == '3.11' && always()
+        run: |
+          echo "### Test Coverage (Python 3.11)" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage.xml ]; then
+            COVERAGE=$(awk -F'"' '/line-rate/{print $2 * 100 "%"; exit}' coverage.xml)
+            echo "**Line coverage:** ${COVERAGE}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Write test summary
+        if: always()
+        run: |
+          echo "### Test Results (Python ${{ matrix.python-version }})" >> $GITHUB_STEP_SUMMARY
+          if [ -f pytest-results.xml ]; then
+            TESTS=$(grep -o 'tests="[0-9]*"' pytest-results.xml | head -1 | grep -o '[0-9]*')
+            FAILURES=$(grep -o 'failures="[0-9]*"' pytest-results.xml | head -1 | grep -o '[0-9]*')
+            ERRORS=$(grep -o 'errors="[0-9]*"' pytest-results.xml | head -1 | grep -o '[0-9]*')
+            echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Tests  | ${TESTS:-0} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Failures | ${FAILURES:-0} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Errors | ${ERRORS:-0} |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No test results file found." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-py${{ matrix.python-version }}
+          path: |
+            pytest-results.xml
+            coverage.xml
+          retention-days: 7

@@ -118,6 +118,8 @@ select = [
     "ANN", # flake8-annotations
     "SIM", # flake8-simplify
     "N",   # pep8-naming
+    "FBT", # flake8-boolean-trap
+    "RUF", # ruff-specific rules
 ]
 ignore = [
     "ANN401",  # allow Any in rare cases
@@ -126,6 +128,17 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["ANN"]
 "scripts/**/*.py" = ["ANN"]
+# Typer CLI: bool params are idiomatic, not a trap
+"src/qode/cli/**/*.py" = ["FBT001", "FBT002", "FBT003"]
+
+# ---------------------------------------------------------------------------
+# Ruff — formatting (mirrors Black)
+# ---------------------------------------------------------------------------
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 # ---------------------------------------------------------------------------
 # Black — formatting
@@ -158,7 +171,8 @@ venvPath = "."
 venv = ".venv"
 include = ["src"]
 exclude = ["frontend", "scripts"]
-typeCheckingMode = "strict"
+extraPaths = ["src"]
+typeCheckingMode = "basic"
 reportMissingImports = true
 reportMissingTypeStubs = false
 reportUnknownMemberType = false

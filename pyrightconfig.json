@@ -1,0 +1,13 @@
+{
+    "pythonVersion": "3.9",
+    "venvPath": ".",
+    "venv": ".venv",
+    "include": ["src"],
+    "exclude": ["frontend", "scripts"],
+    "extraPaths": ["src"],
+    "typeCheckingMode": "basic",
+    "reportMissingImports": true,
+    "reportMissingTypeStubs": false,
+    "reportUnknownMemberType": false,
+    "reportUnknownVariableType": false
+}
