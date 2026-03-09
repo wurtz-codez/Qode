@@ -122,6 +122,7 @@ select = [
     "RUF", # ruff-specific rules
 ]
 ignore = [
+    "ANN101",  # Missing type annotation for self in method
     "ANN401",  # allow Any in rare cases
 ]
 
