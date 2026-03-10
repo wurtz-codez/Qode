@@ -131,6 +131,8 @@ ignore = [
 "scripts/**/*.py" = ["ANN"]
 # Typer CLI: bool params are idiomatic, not a trap
 "src/qode/cli/**/*.py" = ["FBT001", "FBT002", "FBT003"]
+# Tree-sitter S-expression queries cannot be line-wrapped
+"src/qode/core/parsers/queries.py" = ["E501"]
 
 # ---------------------------------------------------------------------------
 # Ruff — formatting (mirrors Black)
