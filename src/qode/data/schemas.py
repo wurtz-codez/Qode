@@ -194,3 +194,55 @@ class ParseResult(BaseModel):
     calls: list[ExtractedCall] = []
     heritage: list[ExtractedHeritage] = []
     file_count: int = 0
+
+
+# -- Pipeline phase -----------------------------------------------------------
+
+PipelinePhase = Literal[
+    "idle",
+    "scanning",
+    "structure",
+    "parsing",
+    "communities",
+    "processes",
+    "complete",
+    "error",
+]
+
+
+# -- Pipeline progress --------------------------------------------------------
+
+
+class PipelineStats(BaseModel):
+    """Counters embedded in progress reports."""
+
+    model_config = ConfigDict(frozen=True)
+
+    files_processed: int
+    total_files: int
+    nodes_created: int
+
+
+class PipelineProgress(BaseModel):
+    """Progress report emitted by the pipeline during execution."""
+
+    phase: PipelinePhase
+    percent: int  # 0-100
+    message: str
+    detail: str = ""
+    stats: Optional[PipelineStats] = None  # noqa: UP045
+
+
+# -- Pipeline result ----------------------------------------------------------
+
+
+class PipelineResult(BaseModel):
+    """Final output of the ingestion pipeline.
+
+    Contains the aggregated parse result from all chunks, repository path,
+    and statistics about the ingestion run.
+    """
+
+    parse_result: ParseResult
+    repo_path: str
+    total_file_count: int
