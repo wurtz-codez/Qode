@@ -11,6 +11,7 @@ from qode.core.processors.calls import (
     _resolve_call_target,
     process_calls,
 )
+from qode.core.processors.heritage import process_heritage
 from qode.core.processors.imports import (
     EXTENSIONS,
     KOTLIN_EXTENSIONS,
@@ -36,6 +37,7 @@ from qode.core.processors.imports import (
 from qode.core.symbol_table import SymbolTable
 from qode.data.schemas import (
     ExtractedCall,
+    ExtractedHeritage,
     ExtractedImport,
     ParsedNode,
     ParsedNodeProperties,
@@ -2306,3 +2308,84 @@ def test_process_calls_unresolved_call():
     st = _make_symbol_table()
     process_calls(pr, symbol_table=st, import_map={})
     assert pr.relationships == []
+
+
+# ===================================================================
+# Heritage Resolution Engine (heritage.py)
+# ===================================================================
+
+
+def test_heritage_same_file():
+    pr = ParseResult()
+    pr.nodes = [
+        _make_node("src/models.ts", name="User", label="Class"),
+        _make_node("src/models.ts", name="BaseModel", label="Class"),
+    ]
+    pr.heritage = [
+        ExtractedHeritage(
+            file_path="src/models.ts",
+            class_name="User",
+            parent_name="BaseModel",
+            kind="extends",
+        )
+    ]
+    symbol_table = SymbolTable.from_parse_result(pr)
+    process_heritage(pr, symbol_table=symbol_table, import_map={})
+
+    assert len(pr.relationships) == 1
+    rel = pr.relationships[0]
+    assert rel.type == "INHERITS"
+    assert rel.confidence == 0.95
+    assert rel.reason == "same-file"
+    assert rel.properties == {"heritage_type": "extends"}
+
+
+def test_heritage_import_resolved():
+    pr = ParseResult()
+    pr.nodes = [
+        _make_node("src/user.ts", name="User", label="Class"),
+        _make_node("src/base.ts", name="BaseModel", label="Class"),
+    ]
+    pr.heritage = [
+        ExtractedHeritage(
+            file_path="src/user.ts",
+            class_name="User",
+            parent_name="BaseModel",
+            kind="extends",
+        )
+    ]
+    symbol_table = SymbolTable.from_parse_result(pr)
+    import_map = {"src/user.ts": {"src/base.ts"}}
+    process_heritage(pr, symbol_table=symbol_table, import_map=import_map)
+
+    assert len(pr.relationships) == 1
+    rel = pr.relationships[0]
+    assert rel.type == "INHERITS"
+    assert rel.confidence == 0.9
+    assert rel.reason == "import-resolved"
+
+
+def test_heritage_fuzzy_global():
+    pr = ParseResult()
+    pr.nodes = [
+        _make_node("src/user.ts", name="User", label="Class"),
+        _make_node("src/base.ts", name="BaseModel", label="Class"),
+    ]
+    pr.heritage = [
+        ExtractedHeritage(
+            file_path="src/user.ts",
+            class_name="User",
+            parent_name="BaseModel",
+            kind="extends",
+        )
+    ]
+    symbol_table = SymbolTable.from_parse_result(pr)
+    # No import map, falls back to fuzzy global
+    process_heritage(pr, symbol_table=symbol_table, import_map={})
+
+    assert len(pr.relationships) == 1
+    rel = pr.relationships[0]
+    assert rel.type == "INHERITS"
+    assert rel.confidence == 0.5
+    assert rel.reason == "fuzzy-global"
+

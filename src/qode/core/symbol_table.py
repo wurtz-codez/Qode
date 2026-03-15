@@ -198,7 +198,17 @@ class SymbolTable:
             *parse_result*.
         """
         table = cls()
-        table.add_all(parse_result.symbols)
+        if parse_result.symbols:
+            table.add_all(parse_result.symbols)
+            return table
+
+        for node in parse_result.nodes:
+            table.add(
+                node.properties.file_path,
+                node.properties.name,
+                node.id,
+                node.label,
+            )
         return table
 
     # -- Lookup methods -------------------------------------------------------

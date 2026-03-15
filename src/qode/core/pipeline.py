@@ -320,10 +320,14 @@ def run_pipeline(
 
         # After parsing, run processors for symbol resolution
         import_map = process_imports(aggregate_result, project_root=str(repo_path))
-        process_heritage(aggregate_result)
-
         # Build symbol table for call resolution
         symbol_table = SymbolTable.from_parse_result(aggregate_result)
+
+        process_heritage(
+            aggregate_result,
+            symbol_table=symbol_table,
+            import_map=import_map,
+        )
         process_calls(
             aggregate_result,
             symbol_table=symbol_table,

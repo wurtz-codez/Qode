@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Literal, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 # ---------------------------------------------------------------------------
 # Phase 1 (Task 4): Parser-related models only.
@@ -104,6 +104,7 @@ class ParsedRelationship(BaseModel):
     type: str  # always "DEFINES" for parser output
     confidence: float
     reason: str
+    properties: Optional[dict[str, str]] = None  # noqa: UP045
 
 
 # -- Symbol table entry -----------------------------------------------------
@@ -187,12 +188,12 @@ class ParseResult(BaseModel):
     batch run.
     """
 
-    nodes: list[ParsedNode] = []
-    relationships: list[ParsedRelationship] = []
-    symbols: list[ParsedSymbol] = []
-    imports: list[ExtractedImport] = []
-    calls: list[ExtractedCall] = []
-    heritage: list[ExtractedHeritage] = []
+    nodes: list[ParsedNode] = Field(default_factory=list)
+    relationships: list[ParsedRelationship] = Field(default_factory=list)
+    symbols: list[ParsedSymbol] = Field(default_factory=list)
+    imports: list[ExtractedImport] = Field(default_factory=list)
+    calls: list[ExtractedCall] = Field(default_factory=list)
+    heritage: list[ExtractedHeritage] = Field(default_factory=list)
     file_count: int = 0
 
 
