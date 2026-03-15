@@ -317,9 +317,8 @@ def run_pipeline(
                 on_progress,
             )
 
-        # After parsing, run stub processors for symbol resolution
-        # These will be implemented in later phases
-        process_imports(aggregate_result)
+        # After parsing, run processors for symbol resolution
+        process_imports(aggregate_result, project_root=str(repo_path))
         process_heritage(aggregate_result)
         process_calls(aggregate_result)
 
