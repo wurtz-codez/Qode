@@ -32,6 +32,7 @@ from qode.core.processors import (
     process_imports,
     process_structure,
 )
+from qode.core.symbol_table import SymbolTable
 from qode.core.walker import CODE_EXTENSIONS, FileEntry, FileWalker
 from qode.data.schemas import (
     ParseResult,
@@ -318,9 +319,16 @@ def run_pipeline(
             )
 
         # After parsing, run processors for symbol resolution
-        process_imports(aggregate_result, project_root=str(repo_path))
+        import_map = process_imports(aggregate_result, project_root=str(repo_path))
         process_heritage(aggregate_result)
-        process_calls(aggregate_result)
+
+        # Build symbol table for call resolution
+        symbol_table = SymbolTable.from_parse_result(aggregate_result)
+        process_calls(
+            aggregate_result,
+            symbol_table=symbol_table,
+            import_map=import_map,
+        )
 
         # Update final stats
         stats = PipelineStats(

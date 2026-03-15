@@ -1,10 +1,16 @@
-"""Tests for the import resolution engine (imports.py)."""
+"""Tests for import resolution (imports.py) and call resolution (calls.py)."""
 
 from __future__ import annotations
 
 import json
 
 from qode.core.parsers.parser import generate_id
+from qode.core.processors.calls import (
+    BUILT_IN_NAMES,
+    _is_built_in_or_noise,
+    _resolve_call_target,
+    process_calls,
+)
 from qode.core.processors.imports import (
     EXTENSIONS,
     KOTLIN_EXTENSIONS,
@@ -27,7 +33,9 @@ from qode.core.processors.imports import (
     suffix_resolve,
     try_resolve_with_extensions,
 )
+from qode.core.symbol_table import SymbolTable
 from qode.data.schemas import (
+    ExtractedCall,
     ExtractedImport,
     ParsedNode,
     ParsedNodeProperties,
@@ -1982,3 +1990,319 @@ def test_pi_no_duplicate_relationships():
 
 def test_pi_resolve_cache_cap_constant():
     assert RESOLVE_CACHE_CAP == 100_000
+
+
+# ===================================================================
+# Call Resolution Engine (calls.py)
+# ===================================================================
+
+
+# -------------------------------------------------------------------
+# Helpers
+# -------------------------------------------------------------------
+
+
+def _make_symbol_table(*entries):
+    """Build a SymbolTable from (file_path, name, node_id, type) tuples."""
+    st = SymbolTable()
+    for fp, name, nid, typ in entries:
+        st.add(fp, name, nid, typ)
+    return st
+
+
+def _make_call(file_path, called_name, source_id):
+    """Build an ExtractedCall."""
+    return ExtractedCall(
+        file_path=file_path, called_name=called_name, source_id=source_id
+    )
+
+
+# -------------------------------------------------------------------
+# BUILT_IN_NAMES tests
+# -------------------------------------------------------------------
+
+
+def test_built_in_names_is_frozenset():
+    assert isinstance(BUILT_IN_NAMES, frozenset)
+
+
+def test_built_in_names_contains_js_builtins():
+    for name in ("console", "setTimeout", "parseInt"):
+        assert name in BUILT_IN_NAMES, f"{name!r} should be in BUILT_IN_NAMES"
+
+
+def test_built_in_names_contains_python_builtins():
+    for name in ("print", "len", "range"):
+        assert name in BUILT_IN_NAMES, f"{name!r} should be in BUILT_IN_NAMES"
+
+
+def test_built_in_names_contains_kotlin_builtins():
+    for name in ("println", "listOf", "mapOf"):
+        assert name in BUILT_IN_NAMES, f"{name!r} should be in BUILT_IN_NAMES"
+
+
+def test_built_in_names_contains_c_builtins():
+    for name in ("printf", "malloc", "free"):
+        assert name in BUILT_IN_NAMES, f"{name!r} should be in BUILT_IN_NAMES"
+
+
+def test_built_in_names_contains_swift_builtins():
+    for name in ("fatalError", "NSLog", "debugPrint"):
+        assert name in BUILT_IN_NAMES, f"{name!r} should be in BUILT_IN_NAMES"
+
+
+def test_built_in_names_contains_react_hooks():
+    for name in ("useState", "useEffect", "useCallback"):
+        assert name in BUILT_IN_NAMES, f"{name!r} should be in BUILT_IN_NAMES"
+
+
+def test_built_in_names_contains_linux_kernel():
+    for name in ("printk", "kmalloc", "kfree"):
+        assert name in BUILT_IN_NAMES, f"{name!r} should be in BUILT_IN_NAMES"
+
+
+# -------------------------------------------------------------------
+# _is_built_in_or_noise tests
+# -------------------------------------------------------------------
+
+
+def test_is_built_in_returns_true_for_builtins():
+    for name in ("console", "print", "printf"):
+        assert (
+            _is_built_in_or_noise(name) is True
+        ), f"_is_built_in_or_noise({name!r}) should be True"
+
+
+def test_is_built_in_returns_false_for_user_functions():
+    for name in ("myFunction", "handleClick", "processOrder"):
+        assert (
+            _is_built_in_or_noise(name) is False
+        ), f"_is_built_in_or_noise({name!r}) should be False"
+
+
+# -------------------------------------------------------------------
+# _resolve_call_target tests
+# -------------------------------------------------------------------
+
+
+def test_resolve_tier1_same_file():
+    st = _make_symbol_table(
+        ("src/a.py", "helper", "Fn::src/a.py::helper::10", "Function"),
+    )
+    result = _resolve_call_target("helper", "src/a.py", st, {})
+    assert result is not None
+    assert result.node_id == "Fn::src/a.py::helper::10"
+    assert result.confidence == 0.85
+    assert result.reason == "same-file"
+
+
+def test_resolve_tier2_import_resolved():
+    st = _make_symbol_table(
+        ("src/b.py", "helper", "Fn::src/b.py::helper::5", "Function"),
+    )
+    import_map = {"src/a.py": {"src/b.py"}}
+    result = _resolve_call_target("helper", "src/a.py", st, import_map)
+    assert result is not None
+    assert result.node_id == "Fn::src/b.py::helper::5"
+    assert result.confidence == 0.9
+    assert result.reason == "import-resolved"
+
+
+def test_resolve_tier3_fuzzy_unique():
+    st = _make_symbol_table(
+        ("src/b.py", "helper", "Fn::src/b.py::helper::5", "Function"),
+    )
+    result = _resolve_call_target("helper", "src/a.py", st, {})
+    assert result is not None
+    assert result.node_id == "Fn::src/b.py::helper::5"
+    assert result.confidence == 0.5
+    assert result.reason == "fuzzy-global"
+
+
+def test_resolve_tier3_fuzzy_ambiguous():
+    st = _make_symbol_table(
+        ("src/b.py", "helper", "Fn::src/b.py::helper::5", "Function"),
+        ("src/c.py", "helper", "Fn::src/c.py::helper::8", "Function"),
+    )
+    result = _resolve_call_target("helper", "src/a.py", st, {})
+    assert result is not None
+    assert result.confidence == 0.3
+    assert result.reason == "fuzzy-global"
+
+
+def test_resolve_returns_none_for_unknown():
+    st = _make_symbol_table()
+    result = _resolve_call_target("nonexistent", "src/a.py", st, {})
+    assert result is None
+
+
+def test_resolve_tier1_preferred_over_tier2():
+    """Tier 1 (same-file) should win even when tier 2 (import-resolved) is available."""
+    st = _make_symbol_table(
+        ("src/a.py", "helper", "Fn::src/a.py::helper::10", "Function"),
+        ("src/b.py", "helper", "Fn::src/b.py::helper::5", "Function"),
+    )
+    import_map = {"src/a.py": {"src/b.py"}}
+    result = _resolve_call_target("helper", "src/a.py", st, import_map)
+    assert result is not None
+    assert result.node_id == "Fn::src/a.py::helper::10"
+    assert result.confidence == 0.85
+    assert result.reason == "same-file"
+
+
+def test_resolve_tier2_preferred_over_tier3():
+    """Tier 2 (import-resolved, 0.9) should win over tier 3 (fuzzy-global)."""
+    st = _make_symbol_table(
+        ("src/b.py", "helper", "Fn::src/b.py::helper::5", "Function"),
+        ("src/c.py", "helper", "Fn::src/c.py::helper::8", "Function"),
+    )
+    import_map = {"src/a.py": {"src/b.py"}}
+    result = _resolve_call_target("helper", "src/a.py", st, import_map)
+    assert result is not None
+    assert result.node_id == "Fn::src/b.py::helper::5"
+    assert result.confidence == 0.9
+    assert result.reason == "import-resolved"
+
+
+# -------------------------------------------------------------------
+# process_calls integration tests
+# -------------------------------------------------------------------
+
+
+def test_process_calls_empty_calls():
+    pr = ParseResult()
+    st = _make_symbol_table()
+    process_calls(pr, symbol_table=st, import_map={})
+    assert pr.relationships == []
+
+
+def test_process_calls_skips_builtins():
+    pr = ParseResult(
+        calls=[
+            _make_call("src/a.py", "console", "Fn::src/a.py::main::1"),
+            _make_call("src/a.py", "print", "Fn::src/a.py::main::1"),
+        ],
+    )
+    st = _make_symbol_table()
+    process_calls(pr, symbol_table=st, import_map={})
+    assert pr.relationships == []
+
+
+def test_process_calls_resolves_same_file_call():
+    source_id = generate_id("Function", "src/a.py:main:1")
+    target_id = generate_id("Function", "src/a.py:helper:10")
+    pr = ParseResult(
+        calls=[_make_call("src/a.py", "helper", source_id)],
+    )
+    st = _make_symbol_table(
+        ("src/a.py", "helper", target_id, "Function"),
+    )
+    process_calls(pr, symbol_table=st, import_map={})
+    assert len(pr.relationships) == 1
+    rel = pr.relationships[0]
+    assert rel.type == "CALLS"
+    assert rel.source_id == source_id
+    assert rel.target_id == target_id
+    assert rel.confidence == 0.85
+    assert rel.reason == "same-file"
+
+
+def test_process_calls_resolves_import_call():
+    source_id = generate_id("Function", "src/a.py:main:1")
+    target_id = generate_id("Function", "src/b.py:helper:5")
+    pr = ParseResult(
+        calls=[_make_call("src/a.py", "helper", source_id)],
+    )
+    st = _make_symbol_table(
+        ("src/b.py", "helper", target_id, "Function"),
+    )
+    import_map = {"src/a.py": {"src/b.py"}}
+    process_calls(pr, symbol_table=st, import_map=import_map)
+    assert len(pr.relationships) == 1
+    rel = pr.relationships[0]
+    assert rel.type == "CALLS"
+    assert rel.confidence == 0.9
+    assert rel.reason == "import-resolved"
+
+
+def test_process_calls_multiple_calls_mixed():
+    """Mix of built-in, resolvable, and unresolvable calls."""
+    source_id = generate_id("Function", "src/a.py:main:1")
+    target_id = generate_id("Function", "src/a.py:helper:10")
+    pr = ParseResult(
+        calls=[
+            _make_call("src/a.py", "console", source_id),  # built-in -> skip
+            _make_call("src/a.py", "helper", source_id),  # resolvable
+            _make_call("src/a.py", "nonexistent", source_id),  # unresolvable
+            _make_call("src/a.py", "print", source_id),  # built-in -> skip
+        ],
+    )
+    st = _make_symbol_table(
+        ("src/a.py", "helper", target_id, "Function"),
+    )
+    process_calls(pr, symbol_table=st, import_map={})
+    # Only "helper" should produce a relationship
+    assert len(pr.relationships) == 1
+    assert pr.relationships[0].target_id == target_id
+
+
+def test_process_calls_relationship_format():
+    """Verify the relationship has correct id format, fields, and type."""
+    source_id = generate_id("Function", "src/a.py:main:1")
+    target_id = generate_id("Function", "src/a.py:doWork:20")
+    pr = ParseResult(
+        calls=[_make_call("src/a.py", "doWork", source_id)],
+    )
+    st = _make_symbol_table(
+        ("src/a.py", "doWork", target_id, "Function"),
+    )
+    process_calls(pr, symbol_table=st, import_map={})
+    assert len(pr.relationships) == 1
+    rel = pr.relationships[0]
+    expected_rel_id = generate_id("CALLS", f"{source_id}:doWork->{target_id}")
+    assert rel.id == expected_rel_id
+    assert rel.source_id == source_id
+    assert rel.target_id == target_id
+    assert rel.type == "CALLS"
+    assert rel.confidence == 0.85
+    assert rel.reason == "same-file"
+
+
+def test_process_calls_appends_to_existing_relationships():
+    """CALLS relationships should be appended, not replace existing ones."""
+    source_id = generate_id("Function", "src/a.py:main:1")
+    target_id = generate_id("Function", "src/a.py:helper:10")
+    # Pre-existing IMPORTS relationship
+    from qode.data.schemas import ParsedRelationship
+
+    existing_rel = ParsedRelationship(
+        id="existing-rel-001",
+        source_id="file::src/a.py",
+        target_id="file::src/b.py",
+        type="IMPORTS",
+        confidence=1.0,
+        reason="direct-import",
+    )
+    pr = ParseResult(
+        relationships=[existing_rel],
+        calls=[_make_call("src/a.py", "helper", source_id)],
+    )
+    st = _make_symbol_table(
+        ("src/a.py", "helper", target_id, "Function"),
+    )
+    process_calls(pr, symbol_table=st, import_map={})
+    # Should now have the original + the new CALLS relationship
+    assert len(pr.relationships) == 2
+    assert pr.relationships[0].type == "IMPORTS"
+    assert pr.relationships[1].type == "CALLS"
+
+
+def test_process_calls_unresolved_call():
+    """Call to a name not in the symbol table produces no relationship."""
+    source_id = generate_id("Function", "src/a.py:main:1")
+    pr = ParseResult(
+        calls=[_make_call("src/a.py", "unknownFunc", source_id)],
+    )
+    st = _make_symbol_table()
+    process_calls(pr, symbol_table=st, import_map={})
+    assert pr.relationships == []
