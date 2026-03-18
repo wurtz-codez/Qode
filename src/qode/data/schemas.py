@@ -66,6 +66,8 @@ class ParsedNodeProperties(BaseModel):
     is_exported: bool
     ast_framework_multiplier: Optional[float] = None  # noqa: UP045
     ast_framework_reason: Optional[str] = None  # noqa: UP045
+    entry_point_score: Optional[float] = None  # noqa: UP045
+    entry_point_reason: Optional[str] = None  # noqa: UP045
     description: Optional[str] = None  # noqa: UP045
 
 

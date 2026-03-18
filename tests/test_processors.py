@@ -11,6 +11,11 @@ from qode.core.processors.calls import (
     _resolve_call_target,
     process_calls,
 )
+from qode.core.processors.entry_points import (
+    calculate_entry_point_score,
+    is_test_file,
+    process_entry_points,
+)
 from qode.core.processors.heritage import process_heritage
 from qode.core.processors.imports import (
     EXTENSIONS,
@@ -39,8 +44,10 @@ from qode.data.schemas import (
     ExtractedCall,
     ExtractedHeritage,
     ExtractedImport,
+    NodeLabel,
     ParsedNode,
     ParsedNodeProperties,
+    ParsedRelationship,
     ParseResult,
 )
 
@@ -52,22 +59,24 @@ from qode.data.schemas import (
 def _make_node(
     file_path,
     name="dummy",
-    label="Function",
+    label: NodeLabel = "Function",
     start_line=1,
     end_line=10,
     language="typescript",
-):
+    *,
+    is_exported=True,
+) -> ParsedNode:
     node_id = generate_id(label, f"{file_path}:{name}:{start_line}")
     return ParsedNode(
         id=node_id,
-        label=label,
+        label=label,  # type: ignore[arg-type]
         properties=ParsedNodeProperties(
             name=name,
             file_path=file_path,
             start_line=start_line,
             end_line=end_line,
             language=language,
-            is_exported=True,
+            is_exported=is_exported,
         ),
     )
 
@@ -338,6 +347,7 @@ def test_tsconfig_alias_with_star(tmp_path):
     }
     (tmp_path / "tsconfig.json").write_text(json.dumps(tsconfig))
     result = load_tsconfig_paths(str(tmp_path))
+    assert result is not None
     assert result.aliases["@/"] == "src/"
 
 
@@ -350,6 +360,7 @@ def test_tsconfig_alias_without_star(tmp_path):
     }
     (tmp_path / "tsconfig.json").write_text(json.dumps(tsconfig))
     result = load_tsconfig_paths(str(tmp_path))
+    assert result is not None
     assert result.aliases["@utils"] == "src/utils"
 
 
@@ -362,6 +373,7 @@ def test_tsconfig_custom_base_url(tmp_path):
     }
     (tmp_path / "tsconfig.json").write_text(json.dumps(tsconfig))
     result = load_tsconfig_paths(str(tmp_path))
+    assert result is not None
     assert result.base_url == "src"
 
 
@@ -448,6 +460,7 @@ def test_composer_strips_trailing_backslash(tmp_path):
     composer = {"autoload": {"psr-4": {"App\\Models\\": "src/Models/"}}}
     (tmp_path / "composer.json").write_text(json.dumps(composer))
     result = load_composer_config(str(tmp_path))
+    assert result is not None
     assert "App\\Models" in result.psr4
 
 
@@ -455,6 +468,7 @@ def test_composer_strips_trailing_slash(tmp_path):
     composer = {"autoload": {"psr-4": {"App\\": "src/"}}}
     (tmp_path / "composer.json").write_text(json.dumps(composer))
     result = load_composer_config(str(tmp_path))
+    assert result is not None
     assert result.psr4["App"] == "src"
 
 
@@ -2070,16 +2084,14 @@ def test_built_in_names_contains_linux_kernel():
 
 def test_is_built_in_returns_true_for_builtins():
     for name in ("console", "print", "printf"):
-        assert (
-            _is_built_in_or_noise(name) is True
-        ), f"_is_built_in_or_noise({name!r}) should be True"
+        message = f"_is_built_in_or_noise({name!r}) should be True"
+        assert _is_built_in_or_noise(name) is True, message
 
 
 def test_is_built_in_returns_false_for_user_functions():
     for name in ("myFunction", "handleClick", "processOrder"):
-        assert (
-            _is_built_in_or_noise(name) is False
-        ), f"_is_built_in_or_noise({name!r}) should be False"
+        message = f"_is_built_in_or_noise({name!r}) should be False"
+        assert _is_built_in_or_noise(name) is False, message
 
 
 # -------------------------------------------------------------------
@@ -2275,8 +2287,6 @@ def test_process_calls_appends_to_existing_relationships():
     source_id = generate_id("Function", "src/a.py:main:1")
     target_id = generate_id("Function", "src/a.py:helper:10")
     # Pre-existing IMPORTS relationship
-    from qode.data.schemas import ParsedRelationship
-
     existing_rel = ParsedRelationship(
         id="existing-rel-001",
         source_id="file::src/a.py",
@@ -2389,3 +2399,94 @@ def test_heritage_fuzzy_global():
     assert rel.confidence == 0.5
     assert rel.reason == "fuzzy-global"
 
+
+# ===================================================================
+# Entry point scoring (entry_points.py)
+# ===================================================================
+
+
+def test_entry_point_score_exported_entry_pattern_framework_bonus():
+    result = calculate_entry_point_score(
+        name="handleLogin",
+        language="typescript",
+        caller_count=1,
+        callee_count=3,
+        is_exported=True,
+        file_path="src/pages/index.tsx",
+    )
+    assert result.score == 13.5
+    assert "exported" in result.reasons
+    assert "entry-pattern" in result.reasons
+    assert "framework:nextjs-page" in result.reasons
+
+
+def test_entry_point_score_utility_penalty():
+    result = calculate_entry_point_score(
+        name="getUser",
+        language="typescript",
+        caller_count=0,
+        callee_count=2,
+        is_exported=True,
+        file_path="src/api/users.ts",
+    )
+    assert result.score == 1.2
+    assert "utility-pattern" in result.reasons
+
+
+def test_entry_point_score_no_outgoing_calls():
+    result = calculate_entry_point_score(
+        name="handleLogin",
+        language="typescript",
+        caller_count=3,
+        callee_count=0,
+        is_exported=True,
+        file_path="src/pages/index.tsx",
+    )
+    assert result.score == 0
+    assert result.reasons == ["no-outgoing-calls"]
+
+
+def test_is_test_file_patterns():
+    assert is_test_file("src/foo.test.ts") is True
+    assert is_test_file("tests/unit/test_user.py") is True
+    assert is_test_file("src/app/main.py") is False
+
+
+def test_process_entry_points_scores_nodes():
+    entry_node = _make_node(
+        "src/app/page.tsx",
+        name="handleLogin",
+        label="Function",
+        language="typescript",
+        is_exported=True,
+    )
+    helper_node = _make_node(
+        "src/helpers.ts",
+        name="getUser",
+        label="Function",
+        language="typescript",
+        is_exported=False,
+    )
+    pr = ParseResult(
+        nodes=[entry_node, helper_node],
+        relationships=[
+            ParsedRelationship(
+                id="rel-1",
+                source_id=entry_node.id,
+                target_id=helper_node.id,
+                type="CALLS",
+                confidence=0.85,
+                reason="same-file",
+            ),
+        ],
+    )
+
+    process_entry_points(pr)
+
+    updated_entry = next(n for n in pr.nodes if n.id == entry_node.id)
+    updated_helper = next(n for n in pr.nodes if n.id == helper_node.id)
+
+    assert updated_entry.properties.entry_point_score == 9.0
+    assert updated_entry.properties.entry_point_reason is not None
+    assert "entry-pattern" in updated_entry.properties.entry_point_reason
+    assert updated_helper.properties.entry_point_score is None
