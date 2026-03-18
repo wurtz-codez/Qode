@@ -18,7 +18,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from qode.core.parsers.queries import LANGUAGE_QUERIES
 from qode.data.schemas import (
@@ -34,6 +34,11 @@ from qode.data.schemas import (
 
 if TYPE_CHECKING:
     from tree_sitter import Language, Node
+
+
+class QueryProtocol(Protocol):
+    def matches(self, node: Node) -> list[tuple[int, dict[str, list[Any]]]]: ...
+
 
 logger = logging.getLogger(__name__)
 
@@ -1223,7 +1228,7 @@ def parse_file(
 
     # --- compile & run query ---------------------------------------------
     try:
-        query = lang_obj.query(query_str)
+        query = cast(QueryProtocol, lang_obj.query(query_str))
     except Exception:
         logger.warning(
             "Failed to compile query for %s (%s); skipping",
