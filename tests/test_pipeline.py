@@ -99,6 +99,7 @@ class TestPipelinePhase:
             "scanning",
             "structure",
             "parsing",
+            "embeddings",
             "communities",
             "processes",
             "complete",
@@ -785,6 +786,7 @@ class TestProgressReporting:
             "scanning",
             "structure",
             "parsing",
+            "embeddings",
             "communities",
             "processes",
             "complete",
@@ -859,6 +861,20 @@ class TestProgressReporting:
             percents = [p.percent for p in progress_reports]
             assert 20 <= min(percents) <= 82
             assert 20 <= max(percents) <= 82
+
+    def test_embedding_phase_reported(self, tmp_path):
+        """Embedding phase should be reported when enabled."""
+        _write(tmp_path / "a.py", "pass\n")
+        progress_reports = []
+
+        def on_progress(progress: PipelineProgress):
+            progress_reports.append(progress)
+
+        with patch("qode.core.pipeline.is_kuzu_ready", return_value=False):
+            run_pipeline(tmp_path, on_progress=on_progress)
+
+        phases = {p.phase for p in progress_reports}
+        assert "embeddings" in phases
 
 
 # ---------------------------------------------------------------------------

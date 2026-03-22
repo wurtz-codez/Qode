@@ -37,6 +37,7 @@ dependencies = [
     "kuzu>=0.7.0",
     # Embeddings
     "sentence-transformers>=3.0.0",
+    "torch>=2.0.0",
     # Agent orchestration
     "langgraph>=0.2.0",
     "langchain-core>=0.3.0",
@@ -135,6 +136,7 @@ ignore = [
 "src/qode/core/parsers/queries.py" = ["E501"]
 # Optional[X] for Python 3.9 compatibility
 "src/qode/core/pipeline.py" = ["UP045"]
+"src/qode/data/embedder.py" = ["UP045"]
 # Import resolution engine: long lines in docstrings, Optional for 3.9
 "src/qode/core/processors/imports.py" = ["UP045"]
 

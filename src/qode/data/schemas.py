@@ -206,6 +206,7 @@ PipelinePhase = Literal[
     "scanning",
     "structure",
     "parsing",
+    "embeddings",
     "communities",
     "processes",
     "complete",

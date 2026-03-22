@@ -518,6 +518,32 @@ async def load_cached_embeddings() -> dict[str, Any]:
     return {"embeddingNodeIds": embedding_node_ids, "embeddings": embeddings}
 
 
+async def upsert_embeddings(
+    embeddings: Sequence[dict[str, Any]],
+) -> dict[str, int]:
+    if conn is None:
+        raise RuntimeError("KuzuDB not initialized. Call initKuzu first.")
+    if not embeddings:
+        return {"inserted": 0, "failed": 0}
+
+    cypher = (
+        f"MERGE (e:{EMBEDDING_TABLE_NAME} {{nodeId: $nodeId}}) "
+        "SET e.embedding = $embedding"
+    )
+    params_list = []
+    for item in embeddings:
+        node_id = str(item.get("nodeId") or "")
+        embedding_value = item.get("embedding")
+        if not node_id or embedding_value is None:
+            continue
+        params_list.append({"nodeId": node_id, "embedding": embedding_value})
+    if not params_list:
+        return {"inserted": 0, "failed": 0}
+
+    await execute_with_reused_statement(cypher, params_list)
+    return {"inserted": len(params_list), "failed": 0}
+
+
 async def close_kuzu() -> None:
     global db, conn, current_db_path, fts_loaded
     if conn is not None:
@@ -725,6 +751,7 @@ executeQuery = execute_query  # noqa: N816
 executeWithReusedStatement = execute_with_reused_statement  # noqa: N816
 getKuzuStats = get_kuzu_stats  # noqa: N816
 loadCachedEmbeddings = load_cached_embeddings  # noqa: N816
+upsertEmbeddings = upsert_embeddings  # noqa: N816
 closeKuzu = close_kuzu  # noqa: N816
 isKuzuReady = is_kuzu_ready  # noqa: N816
 deleteNodesForFile = delete_nodes_for_file  # noqa: N816

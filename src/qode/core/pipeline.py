@@ -16,9 +16,12 @@ its output — a populated knowledge graph.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator
+import asyncio
+import importlib
+import threading
+from collections.abc import Callable, Coroutine, Iterator
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional, TypeVar, cast
 
 from qode.core.ignore import IgnoreService
 from qode.core.parsers import parse_batch
@@ -34,6 +37,12 @@ from qode.core.processors import (
 )
 from qode.core.symbol_table import SymbolTable
 from qode.core.walker import CODE_EXTENSIONS, FileEntry, FileWalker
+from qode.data.embedder import dispose_embedder, embed_texts
+from qode.data.kuzu_adapter import (
+    is_kuzu_ready,
+    load_cached_embeddings,
+    upsert_embeddings,
+)
 from qode.data.schemas import (
     ParseResult,
     PipelinePhase,
@@ -139,6 +148,90 @@ def _emit_progress(
             stats=stats,
         )
         callback(progress)
+
+
+T = TypeVar("T")
+
+
+def _load_pipeline_config(repo_path: Path) -> dict[str, object]:
+    config_path = repo_path / ".qode.toml"
+    if not config_path.exists():
+        return {}
+
+    try:
+        try:
+            toml_loader = importlib.import_module("tomllib")
+        except ModuleNotFoundError:  # pragma: no cover - py39 fallback
+            toml_loader = importlib.import_module("tomli")
+
+        with config_path.open("rb") as handle:
+            data = toml_loader.load(handle)
+    except Exception:
+        return {}
+
+    if isinstance(data, dict):
+        return data
+    return {}
+
+
+def _should_skip_embeddings(
+    repo_path: Path,
+    config: Optional[dict[str, object]] = None,
+) -> bool:
+    config_data = config if config is not None else _load_pipeline_config(repo_path)
+    analysis = config_data.get("analysis")
+    if isinstance(analysis, dict):
+        skip_value = analysis.get("skip_embeddings")
+        if isinstance(skip_value, bool):
+            return skip_value
+    return False
+
+
+def _run_async(operation: Coroutine[Any, Any, T]) -> T:
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return cast(T, asyncio.run(operation))
+
+    result: dict[str, Any] = {}
+    error: dict[str, BaseException] = {}
+
+    def _runner() -> None:
+        try:
+            result["value"] = asyncio.run(operation)
+        except BaseException as exc:
+            error["value"] = exc
+
+    thread = threading.Thread(target=_runner, name="qode-async-runner", daemon=True)
+    thread.start()
+    thread.join()
+
+    if "value" in error:
+        raise error["value"]
+    return cast(T, result.get("value"))
+
+
+def _collect_embedding_texts(parse_result: ParseResult) -> tuple[list[str], list[str]]:
+    texts: list[str] = []
+    node_ids: list[str] = []
+    for node in parse_result.nodes:
+        properties = node.properties
+        name = properties.name
+        file_path = properties.file_path
+        label = node.label
+        payload = f"{label} {name} {file_path}".strip()
+        if not payload:
+            continue
+        texts.append(payload)
+        node_ids.append(node.id)
+    return node_ids, texts
+
+
+def _normalize_cached_ids(cached: dict[str, Any]) -> set[str]:
+    value = cached.get("embeddingNodeIds")
+    if isinstance(value, set):
+        return {str(item) for item in value}
+    return set()
 
 
 def run_pipeline(
@@ -334,6 +427,63 @@ def run_pipeline(
             import_map=import_map,
         )
 
+        # ---------------------------------------------------------------------
+        # Phase 4.5: Embeddings (82-92%)
+        # ---------------------------------------------------------------------
+        skip_embeddings = _should_skip_embeddings(repo_path)
+        if skip_embeddings or not is_kuzu_ready():
+            _emit_progress(
+                "embeddings",
+                82,
+                "Skipping embeddings",
+                "Disabled by config" if skip_embeddings else "KuzuDB not ready",
+                stats,
+                on_progress,
+            )
+        else:
+            _emit_progress(
+                "embeddings",
+                82,
+                "Generating embeddings...",
+                "",
+                stats,
+                on_progress,
+            )
+
+            node_ids, texts = _collect_embedding_texts(aggregate_result)
+            cached_ids: set[str] = set()
+            if texts:
+                cached = cast(dict[str, Any], _run_async(load_cached_embeddings()))
+                cached_ids = _normalize_cached_ids(cached)
+
+            new_node_ids: list[str] = []
+            new_texts: list[str] = []
+            cache_lookup = cached_ids.__contains__ if cached_ids else None
+            for node_id, text in zip(node_ids, texts):
+                if cache_lookup is not None and cache_lookup(node_id):
+                    continue
+                new_node_ids.append(node_id)
+                new_texts.append(text)
+
+            if new_texts:
+                vectors = embed_texts(new_texts)
+                embed_payload = [
+                    {"nodeId": node_id, "embedding": vector}
+                    for node_id, vector in zip(new_node_ids, vectors)
+                ]
+                if embed_payload:
+                    _run_async(upsert_embeddings(embed_payload))
+
+            dispose_embedder()
+            _emit_progress(
+                "embeddings",
+                92,
+                "Embeddings generated",
+                "",
+                stats,
+                on_progress,
+            )
+
         # Update final stats
         stats = PipelineStats(
             files_processed=total_file_count,
@@ -346,7 +496,7 @@ def run_pipeline(
         # ---------------------------------------------------------------------
         _emit_progress(
             "communities",
-            82,
+            92 if not skip_embeddings and is_kuzu_ready() else 82,
             "Detecting code communities...",
             "",
             stats,
@@ -358,7 +508,7 @@ def run_pipeline(
 
         _emit_progress(
             "communities",
-            92,
+            94 if not skip_embeddings and is_kuzu_ready() else 92,
             "Code communities detected",
             "",
             stats,
@@ -370,7 +520,7 @@ def run_pipeline(
         # ---------------------------------------------------------------------
         _emit_progress(
             "processes",
-            94,
+            96 if not skip_embeddings and is_kuzu_ready() else 94,
             "Detecting execution flows...",
             "",
             stats,
