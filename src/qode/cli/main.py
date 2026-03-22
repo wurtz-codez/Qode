@@ -5,6 +5,9 @@ from __future__ import annotations
 import typer
 from rich.console import Console
 
+from qode.cli.commands.analyze import analyze
+from qode.cli.commands.status import status
+
 app = typer.Typer(
     name="qode",
     help="Local-first, multi-agent code archaeology and intelligence system.",
@@ -32,11 +35,8 @@ def main(
         raise typer.Exit()
 
 
-# ---------------------------------------------------------------------------
-# Register sub-commands (will be populated in later phases)
-# ---------------------------------------------------------------------------
-# from qode.cli.commands.analyze import analyze_cmd
-# app.add_typer(analyze_cmd, name="analyze")
+app.command("analyze")(analyze)
+app.command("status")(status)
 
 
 if __name__ == "__main__":
