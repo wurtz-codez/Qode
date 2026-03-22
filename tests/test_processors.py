@@ -11,11 +11,13 @@ from qode.core.processors.calls import (
     _resolve_call_target,
     process_calls,
 )
+from qode.core.processors.community import process_communities
 from qode.core.processors.entry_points import (
     calculate_entry_point_score,
     is_test_file,
     process_entry_points,
 )
+from qode.core.processors.flows import process_flows
 from qode.core.processors.heritage import process_heritage
 from qode.core.processors.imports import (
     EXTENSIONS,
@@ -2490,3 +2492,158 @@ def test_process_entry_points_scores_nodes():
     assert updated_entry.properties.entry_point_reason is not None
     assert "entry-pattern" in updated_entry.properties.entry_point_reason
     assert updated_helper.properties.entry_point_score is None
+
+
+# ===================================================================
+# Community + flow processors
+# ===================================================================
+
+
+def test_process_communities_creates_community_nodes_and_memberships():
+    a = _make_node("src/app.py", name="startServer", label="Function")
+    b = _make_node("src/app.py", name="handleRequest", label="Function")
+    c = _make_node("src/db.py", name="openConnection", label="Function")
+    d = _make_node("src/db.py", name="closeConnection", label="Function")
+    pr = ParseResult(
+        nodes=[a, b, c, d],
+        relationships=[
+            ParsedRelationship(
+                id="r1",
+                source_id=a.id,
+                target_id=b.id,
+                type="CALLS",
+                confidence=1.0,
+                reason="",
+            ),
+            ParsedRelationship(
+                id="r2",
+                source_id=c.id,
+                target_id=d.id,
+                type="CALLS",
+                confidence=1.0,
+                reason="",
+            ),
+        ],
+    )
+
+    process_communities(pr)
+
+    community_nodes = [node for node in pr.nodes if node.label == "Community"]
+    assert len(community_nodes) == 2
+    for community in community_nodes:
+        assert community.properties.symbol_count == 2
+        assert community.properties.enriched_by in {"leiden", "fallback-deterministic"}
+        assert community.properties.heuristic_label is not None
+
+    member_edges = [rel for rel in pr.relationships if rel.type == "MEMBER_OF"]
+    assert len(member_edges) == 4
+    assert {rel.source_id for rel in member_edges} == {a.id, b.id, c.id, d.id}
+
+
+def test_process_flows_bfs_creates_process_and_step_metadata():
+    entry = _make_node(
+        "src/main.py",
+        name="main",
+        label="Function",
+        is_exported=True,
+    )
+    worker = _make_node("src/main.py", name="doWork", label="Function")
+    save = _make_node("src/store.py", name="saveResult", label="Function")
+
+    entry = entry.model_copy(
+        update={
+            "properties": entry.properties.model_copy(
+                update={
+                    "entry_point_score": 10.0,
+                    "entry_point_reason": "test",
+                }
+            )
+        }
+    )
+
+    pr = ParseResult(
+        nodes=[entry, worker, save],
+        relationships=[
+            ParsedRelationship(
+                id="c1",
+                source_id=entry.id,
+                target_id=worker.id,
+                type="CALLS",
+                confidence=1.0,
+                reason="",
+            ),
+            ParsedRelationship(
+                id="c2",
+                source_id=worker.id,
+                target_id=save.id,
+                type="CALLS",
+                confidence=1.0,
+                reason="",
+            ),
+        ],
+    )
+
+    process_communities(pr)
+    process_flows(pr)
+
+    process_nodes = [node for node in pr.nodes if node.label == "Process"]
+    assert len(process_nodes) == 1
+    process_node = process_nodes[0]
+    assert process_node.properties.entry_point_id == entry.id
+    assert process_node.properties.terminal_id == save.id
+    assert process_node.properties.step_count == 3
+    assert process_node.properties.process_type == "entrypoint-bfs"
+
+    step_edges = [rel for rel in pr.relationships if rel.type == "STEP_IN_PROCESS"]
+    assert len(step_edges) == 3
+    by_source = {rel.source_id: rel.step for rel in step_edges}
+    assert by_source[entry.id] == 0
+    assert by_source[worker.id] == 1
+    assert by_source[save.id] == 2
+
+
+def test_process_flows_is_deterministic_across_runs():
+    entry = _make_node("src/main.py", name="main", label="Function", is_exported=True)
+    a = _make_node("src/main.py", name="a", label="Function")
+    b = _make_node("src/main.py", name="b", label="Function")
+    entry = entry.model_copy(
+        update={
+            "properties": entry.properties.model_copy(update={"entry_point_score": 1.0})
+        }
+    )
+
+    def _run_once() -> tuple[list[str], list[tuple[str, int | None]]]:
+        pr = ParseResult(
+            nodes=[entry, a, b],
+            relationships=[
+                ParsedRelationship(
+                    id="r1",
+                    source_id=entry.id,
+                    target_id=b.id,
+                    type="CALLS",
+                    confidence=1.0,
+                    reason="",
+                ),
+                ParsedRelationship(
+                    id="r2",
+                    source_id=entry.id,
+                    target_id=a.id,
+                    type="CALLS",
+                    confidence=1.0,
+                    reason="",
+                ),
+            ],
+        )
+        process_flows(pr)
+        proc_ids = sorted(node.id for node in pr.nodes if node.label == "Process")
+        steps = sorted(
+            (rel.source_id, rel.step)
+            for rel in pr.relationships
+            if rel.type == "STEP_IN_PROCESS"
+        )
+        return proc_ids, steps
+
+    first_proc_ids, first_steps = _run_once()
+    second_proc_ids, second_steps = _run_once()
+    assert first_proc_ids == second_proc_ids
+    assert first_steps == second_steps

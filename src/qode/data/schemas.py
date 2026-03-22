@@ -22,6 +22,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 # Every valid entity label the parser can produce.
 NodeLabel = Literal[
+    "File",
+    "Folder",
     "Function",
     "Class",
     "Interface",
@@ -44,6 +46,8 @@ NodeLabel = Literal[
     "Annotation",
     "Constructor",
     "Template",
+    "Community",
+    "Process",
     "CodeElement",
 ]
 
@@ -69,6 +73,16 @@ class ParsedNodeProperties(BaseModel):
     entry_point_score: Optional[float] = None  # noqa: UP045
     entry_point_reason: Optional[str] = None  # noqa: UP045
     description: Optional[str] = None  # noqa: UP045
+    heuristic_label: Optional[str] = None  # noqa: UP045
+    keywords: Optional[list[str]] = None  # noqa: UP045
+    enriched_by: Optional[str] = None  # noqa: UP045
+    cohesion: Optional[float] = None  # noqa: UP045
+    symbol_count: Optional[int] = None  # noqa: UP045
+    process_type: Optional[str] = None  # noqa: UP045
+    step_count: Optional[int] = None  # noqa: UP045
+    communities: Optional[list[str]] = None  # noqa: UP045
+    entry_point_id: Optional[str] = None  # noqa: UP045
+    terminal_id: Optional[str] = None  # noqa: UP045
 
 
 class ParsedNode(BaseModel):
@@ -106,6 +120,7 @@ class ParsedRelationship(BaseModel):
     type: str  # always "DEFINES" for parser output
     confidence: float
     reason: str
+    step: Optional[int] = None  # noqa: UP045
     properties: Optional[dict[str, str]] = None  # noqa: UP045
 
 
