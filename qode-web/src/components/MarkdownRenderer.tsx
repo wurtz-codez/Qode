@@ -12,7 +12,7 @@ const customTheme = {
     ...vscDarkPlus,
     'pre[class*="language-"]': {
         ...vscDarkPlus['pre[class*="language-"]'],
-        background: '#0a0a10',
+        background: '#171717',
         margin: 0,
         padding: '16px 0',
         fontSize: '13px',
@@ -150,14 +150,15 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                     style={customTheme}
                     language={language}
                     PreTag="div"
-                    customStyle={{
+                      customStyle={{
                         margin: 0,
-                        padding: '14px 16px',
-                        borderRadius: '8px',
-                        fontSize: '13px',
-                        background: '#0a0a10',
-                        border: '1px solid #1e1e2a',
-                    }}
+                        padding: '1rem',
+                        background: '#171717',
+                        border: '1px solid #404040',
+                        borderTop: 'none',
+                        borderBottomLeftRadius: '0.5rem',
+                        borderBottomRightRadius: '0.5rem',
+                      }}
                 >
                     {codeContent}
                 </SyntaxHighlighter>

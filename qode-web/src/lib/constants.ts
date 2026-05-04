@@ -2,23 +2,23 @@ import { NodeLabel } from '../core/graph/types';
 
 // Node colors by type - slightly muted for less visual noise
 export const NODE_COLORS: Record<NodeLabel, string> = {
-  Project: '#a855f7',    // Purple - prominent
-  Package: '#8b5cf6',    // Violet
-  Module: '#7c3aed',     // Violet darker
-  Folder: '#6366f1',     // Indigo
-  File: '#3b82f6',       // Blue
-  Class: '#f59e0b',      // Amber - stands out
-  Function: '#10b981',   // Emerald
-  Method: '#14b8a6',     // Teal
-  Variable: '#64748b',   // Slate - muted (less important)
-  Interface: '#ec4899',  // Pink
-  Enum: '#f97316',       // Orange
-  Decorator: '#eab308',  // Yellow
-  Import: '#475569',     // Slate darker - very muted
-  Type: '#a78bfa',       // Violet light
-  CodeElement: '#64748b', // Slate - muted
-  Community: '#818cf8',  // Indigo light - cluster indicator
-  Process: '#f43f5e',    // Rose - execution flow indicator
+  Project: '#ffffff',    // Purple - prominent
+  Package: '#d4d4d4',    // Violet
+  Module: '#e5e5e5',     // Violet darker
+  Folder: '#404040',     // Indigo
+  File: '#e5e5e5',       // Blue
+  Class: '#ffffff',      // Amber - stands out
+  Function: '#d4d4d4',   // Emerald
+  Method: '#e5e5e5',     // Teal
+  Variable: '#e5e5e5',   // Slate - muted (less important)
+  Interface: '#d4d4d4',  // Pink
+  Enum: '#ffffff',       // Orange
+  Decorator: '#ffffff',  // Yellow
+  Import: '#404040',     // Slate darker - very muted
+  Type: '#ffffff',       // Violet light
+  CodeElement: '#e5e5e5', // Slate - muted
+  Community: '#e5e5e5',  // Indigo light - cluster indicator
+  Process: '#ffffff',    // Rose - execution flow indicator
 };
 
 // Node sizes by type - clear visual hierarchy with dramatic size differences
@@ -45,18 +45,18 @@ export const NODE_SIZES: Record<NodeLabel, number> = {
 
 // Community color palette for cluster-based coloring
 export const COMMUNITY_COLORS = [
-  '#ef4444', // red
-  '#f97316', // orange
-  '#eab308', // yellow
-  '#22c55e', // green
-  '#06b6d4', // cyan
-  '#3b82f6', // blue
-  '#8b5cf6', // violet
-  '#d946ef', // fuchsia
-  '#ec4899', // pink
-  '#f43f5e', // rose
-  '#14b8a6', // teal
-  '#84cc16', // lime
+  '#ffffff', // red
+  '#d4d4d4', // orange
+  '#e5e5e5', // yellow
+  '#404040', // green
+  '#e5e5e5', // cyan
+  '#d4d4d4', // blue
+  '#ffffff', // violet
+  '#404040', // fuchsia
+  '#e5e5e5', // pink
+  '#d4d4d4', // rose
+  '#ffffff', // teal
+  '#e5e5e5', // lime
 ];
 
 export const getCommunityColor = (communityIndex: number): string => {
@@ -114,10 +114,10 @@ export const DEFAULT_VISIBLE_EDGES: EdgeType[] = [
 
 // Edge display info for UI
 export const EDGE_INFO: Record<EdgeType, { color: string; label: string }> = {
-  CONTAINS: { color: '#2d5a3d', label: 'Contains' },
-  DEFINES: { color: '#0e7490', label: 'Defines' },
-  IMPORTS: { color: '#1d4ed8', label: 'Imports' },
-  CALLS: { color: '#7c3aed', label: 'Calls' },
-  EXTENDS: { color: '#c2410c', label: 'Extends' },
-  IMPLEMENTS: { color: '#be185d', label: 'Implements' },
+  CONTAINS: { color: '#404040', label: 'Contains' },
+  DEFINES: { color: '#e5e5e5', label: 'Defines' },
+  IMPORTS: { color: '#d4d4d4', label: 'Imports' },
+  CALLS: { color: '#ffffff', label: 'Calls' },
+  EXTENDS: { color: '#e5e5e5', label: 'Extends' },
+  IMPLEMENTS: { color: '#d4d4d4', label: 'Implements' },
 };

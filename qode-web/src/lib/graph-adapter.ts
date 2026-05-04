@@ -172,7 +172,7 @@ export const knowledgeGraphToGraphology = (
       x,
       y,
       size: scaledSize,
-      color: NODE_COLORS[node.label] || '#9ca3af',
+      color: NODE_COLORS[node.label] || '#404040',
       label: node.properties.name,
       nodeType: node.label,
       filePath: node.properties.filePath,
@@ -229,7 +229,7 @@ export const knowledgeGraphToGraphology = (
     const usesCommunityColor = hasCommunity && symbolTypes.has(node.label);
     const nodeColor = usesCommunityColor
       ? getCommunityColor(communityIndex!)
-      : NODE_COLORS[node.label] || '#9ca3af';
+      : NODE_COLORS[node.label] || '#404040';
 
     graph.addNode(nodeId, {
       x,
@@ -280,26 +280,18 @@ export const knowledgeGraphToGraphology = (
   // Using varied hues so relationships are easily distinguishable
   const EDGE_STYLES: Record<string, { color: string; sizeMultiplier: number }> = {
     // STRUCTURAL - Greens (folder/file hierarchy)
-    CONTAINS: { color: '#2d5a3d', sizeMultiplier: 0.4 },    // Forest green - folder contains
-
-    // DEFINITIONS - Cyan/Teal (code definitions)
-    DEFINES: { color: '#0e7490', sizeMultiplier: 0.5 },     // Cyan - file defines function/class
-
-    // DEPENDENCIES - Blue (imports between files)
-    IMPORTS: { color: '#1d4ed8', sizeMultiplier: 0.6 },     // Blue - file imports file
-
-    // FUNCTION FLOW - Purple (call graph)
-    CALLS: { color: '#7c3aed', sizeMultiplier: 0.8 },       // Violet - function calls
-
-    // TYPE RELATIONSHIPS - Warm colors (OOP)
-    EXTENDS: { color: '#c2410c', sizeMultiplier: 1.0 },     // Orange - extension
-    IMPLEMENTS: { color: '#be185d', sizeMultiplier: 0.9 },  // Pink - interface implementation
+    CONTAINS: { color: '#404040', sizeMultiplier: 0.4 },    // Forest green - folder contains
+    DEFINES: { color: '#e5e5e5', sizeMultiplier: 0.5 },     // Cyan - file defines function/class
+    IMPORTS: { color: '#d4d4d4', sizeMultiplier: 0.6 },     // Blue - file imports file
+    CALLS: { color: '#ffffff', sizeMultiplier: 0.8 },       // Violet - function calls
+    EXTENDS: { color: '#e5e5e5', sizeMultiplier: 1.0 },     // Orange - extension
+    IMPLEMENTS: { color: '#d4d4d4', sizeMultiplier: 0.9 },  // Pink - interface implementation
   };
 
   knowledgeGraph.relationships.forEach((rel) => {
     if (graph.hasNode(rel.sourceId) && graph.hasNode(rel.targetId)) {
       if (!graph.hasEdge(rel.sourceId, rel.targetId)) {
-        const style = EDGE_STYLES[rel.type] || { color: '#4a4a5a', sizeMultiplier: 0.5 };
+        const style = EDGE_STYLES[rel.type] || { color: '#404040', sizeMultiplier: 0.5 };
         const curvature = 0.12 + (Math.random() * 0.08);
 
         graph.addEdge(rel.sourceId, rel.targetId, {

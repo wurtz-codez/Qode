@@ -221,7 +221,7 @@ export const RightPanel = () => {
               }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Nexus AI</span>
+            <span>QodeAI</span>
           </button>
 
           {/* Processes Tab */}
@@ -336,7 +336,7 @@ export const RightPanel = () => {
                       <div>
                         <div className="flex items-center gap-2 mb-3">
                           <Sparkles className="w-4 h-4 text-accent" />
-                          <span className="text-xs font-medium text-text-muted uppercase tracking-wide">Nexus AI</span>
+                          <span className="text-xs font-medium text-text-muted uppercase tracking-wide">QodeAI</span>
                           {isChatLoading && message === chatMessages[chatMessages.length - 1] && (
                             <Loader2 className="w-3 h-3 animate-spin text-accent" />
                           )}

@@ -24,18 +24,18 @@ mermaid.initialize({
     maxTextSize: 900000, // Increase from default 50000 to handle large combined diagrams
     theme: 'base',
     themeVariables: {
-        primaryColor: '#1e293b', // node bg
-        primaryTextColor: '#f1f5f9',
-        primaryBorderColor: '#22d3ee',
-        lineColor: '#94a3b8',
-        secondaryColor: '#1e293b',
-        tertiaryColor: '#0f172a',
-        mainBkg: '#1e293b', // background
-        nodeBorder: '#22d3ee',
-        clusterBkg: '#1e293b',
-        clusterBorder: '#475569',
-        titleColor: '#f1f5f9',
-        edgeLabelBackground: '#0f172a',
+        primaryColor: '#0a0a0a', // node bg
+        primaryTextColor: '#ffffff',
+        primaryBorderColor: '#e5e5e5',
+        lineColor: '#d4d4d4',
+        secondaryColor: '#171717',
+        tertiaryColor: '#171717',
+        mainBkg: '#0a0a0a', // background
+        nodeBorder: '#e5e5e5',
+        clusterBkg: '#0a0a0a',
+        clusterBorder: '#404040',
+        titleColor: '#ffffff',
+        edgeLabelBackground: '#171717',
     },
     flowchart: {
         curve: 'basis',

@@ -44,18 +44,18 @@ export interface CommunityDetectionResult {
 // ============================================================================
 
 export const COMMUNITY_COLORS = [
-  '#ef4444', // red
-  '#f97316', // orange
-  '#eab308', // yellow
-  '#22c55e', // green
-  '#06b6d4', // cyan
-  '#3b82f6', // blue
-  '#8b5cf6', // violet
-  '#d946ef', // fuchsia
-  '#ec4899', // pink
-  '#f43f5e', // rose
-  '#14b8a6', // teal
-  '#84cc16', // lime
+  '#ffffff', // red
+  '#d4d4d4', // orange
+  '#e5e5e5', // yellow
+  '#404040', // green
+  '#e5e5e5', // cyan
+  '#d4d4d4', // blue
+  '#ffffff', // violet
+  '#404040', // fuchsia
+  '#e5e5e5', // pink
+  '#d4d4d4', // rose
+  '#ffffff', // teal
+  '#e5e5e5', // lime
 ];
 
 export const getCommunityColor = (communityIndex: number): string => {

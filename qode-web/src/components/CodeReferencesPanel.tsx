@@ -10,7 +10,7 @@ const customTheme = {
   ...vscDarkPlus,
   'pre[class*="language-"]': {
     ...vscDarkPlus['pre[class*="language-"]'],
-    background: '#0a0a10',
+    background: '#171717',
     margin: 0,
     padding: '12px 0',
     fontSize: '13px',
@@ -279,7 +279,7 @@ export const CodeReferencesPanel = ({ onFocusNode }: CodeReferencesPanelProps) =
                   lineNumberStyle={{
                     minWidth: '3em',
                     paddingRight: '1em',
-                    color: '#5a5a70',
+                    color: '#e5e5e5',
                     textAlign: 'right',
                     userSelect: 'none',
                   }}
@@ -294,7 +294,7 @@ export const CodeReferencesPanel = ({ onFocusNode }: CodeReferencesPanelProps) =
                       style: {
                         display: 'block',
                         backgroundColor: isHighlighted ? 'rgba(6, 182, 212, 0.14)' : 'transparent',
-                        borderLeft: isHighlighted ? '3px solid #06b6d4' : '3px solid transparent',
+                        borderLeft: isHighlighted ? '3px solid #e5e5e5' : '3px solid transparent',
                         paddingLeft: '12px',
                         paddingRight: '16px',
                       },
@@ -359,7 +359,7 @@ export const CodeReferencesPanel = ({ onFocusNode }: CodeReferencesPanelProps) =
               <div className="px-3 py-2 border-b border-border-subtle bg-surface/40 flex items-start gap-2">
                 <span
                   className="mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide flex-shrink-0"
-                  style={{ backgroundColor: nodeColor, color: '#06060a' }}
+                  style={{ backgroundColor: nodeColor, color: '#0a0a0a' }}
                   title={ref.label ?? 'Code'}
                 >
                   {ref.label ?? 'Code'}
@@ -418,7 +418,7 @@ export const CodeReferencesPanel = ({ onFocusNode }: CodeReferencesPanelProps) =
                     lineNumberStyle={{
                       minWidth: '3em',
                       paddingRight: '1em',
-                      color: '#5a5a70',
+                      color: '#e5e5e5',
                       textAlign: 'right',
                       userSelect: 'none',
                     }}
@@ -431,7 +431,7 @@ export const CodeReferencesPanel = ({ onFocusNode }: CodeReferencesPanelProps) =
                         style: {
                           display: 'block',
                           backgroundColor: isHighlighted ? 'rgba(6, 182, 212, 0.14)' : 'transparent',
-                          borderLeft: isHighlighted ? '3px solid #06b6d4' : '3px solid transparent',
+                          borderLeft: isHighlighted ? '3px solid #e5e5e5' : '3px solid transparent',
                           paddingLeft: '12px',
                           paddingRight: '16px',
                         },

@@ -42,11 +42,11 @@ export function generateProcessMermaid(process: ProcessData): string {
 
   // Add class definitions for styling (rounded corners + colors)
   lines.push('  %% Styles');
-  lines.push('  classDef default fill:#1e293b,stroke:#94a3b8,stroke-width:3px,color:#f8fafc,rx:10,ry:10,font-size:24px;');
-  lines.push('  classDef entry fill:#1e293b,stroke:#34d399,stroke-width:5px,color:#f8fafc,rx:10,ry:10,font-size:24px;');
-  lines.push('  classDef step fill:#1e293b,stroke:#22d3ee,stroke-width:3px,color:#f8fafc,rx:10,ry:10,font-size:24px;');
-  lines.push('  classDef terminal fill:#1e293b,stroke:#f472b6,stroke-width:5px,color:#f8fafc,rx:10,ry:10,font-size:24px;');
-  lines.push('  classDef cluster fill:#0f172a,stroke:#334155,stroke-width:3px,color:#94a3b8,rx:4,ry:4,font-size:20px;');
+  lines.push('  classDef default fill:#0a0a0a,stroke:#404040,stroke-width:3px,color:#ffffff,rx:10,ry:10,font-size:24px;');
+  lines.push('  classDef entry fill:#0a0a0a,stroke:#e5e5e5,stroke-width:5px,color:#ffffff,rx:10,ry:10,font-size:24px;');
+  lines.push('  classDef step fill:#0a0a0a,stroke:#d4d4d4,stroke-width:3px,color:#ffffff,rx:10,ry:10,font-size:24px;');
+  lines.push('  classDef terminal fill:#0a0a0a,stroke:#ffffff,stroke-width:5px,color:#ffffff,rx:10,ry:10,font-size:24px;');
+  lines.push('  classDef cluster fill:#171717,stroke:#0a0a0a,stroke-width:3px,color:#d4d4d4,rx:4,ry:4,font-size:20px;');
 
   // Track clusters for subgraph grouping
   const clusterGroups = new Map<string, ProcessStep[]>();
@@ -152,7 +152,7 @@ export function generateSimpleMermaid(processLabel: string, stepCount: number): 
   const [entry, terminal] = processLabel.split(' → ').map(s => s.trim());
 
   return `graph LR
-  classDef entry fill:#059669,stroke:#34d399,stroke-width:2px,color:#ffffff,rx:10,ry:10;
-  classDef terminal fill:#be185d,stroke:#f472b6,stroke-width:2px,color:#ffffff,rx:10,ry:10;
+  classDef entry fill:#171717,stroke:#e5e5e5,stroke-width:2px,color:#ffffff,rx:10,ry:10;
+  classDef terminal fill:#171717,stroke:#ffffff,stroke-width:2px,color:#ffffff,rx:10,ry:10;
   A["🟢 ${entry || 'Start'}"]:::entry --> B["... ${stepCount - 2} steps ..."] --> C["🔴 ${terminal || 'End'}"]:::terminal`;
 }

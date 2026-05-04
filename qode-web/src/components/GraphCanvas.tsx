@@ -180,7 +180,7 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle>((_, ref) => {
           style={{
             background: `
               radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.03) 0%, transparent 70%),
-              linear-gradient(to bottom, #06060a, #0a0a10)
+              linear-gradient(to bottom, #0a0a0a, #171717)
             `
           }}
         />

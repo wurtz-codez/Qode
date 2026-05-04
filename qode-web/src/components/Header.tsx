@@ -7,15 +7,15 @@ import { EmbeddingStatus } from './EmbeddingStatus';
 
 // Color mapping for node types in search results
 const NODE_TYPE_COLORS: Record<string, string> = {
-  Folder: '#6366f1',
-  File: '#3b82f6',
-  Function: '#10b981',
-  Class: '#f59e0b',
-  Method: '#14b8a6',
-  Interface: '#ec4899',
-  Variable: '#64748b',
-  Import: '#475569',
-  Type: '#a78bfa',
+  Folder: '#404040',
+  File: '#e5e5e5',
+  Function: '#d4d4d4',
+  Class: '#ffffff',
+  Method: '#e5e5e5',
+  Interface: '#d4d4d4',
+  Variable: '#e5e5e5',
+  Import: '#404040',
+  Type: '#ffffff',
 };
 
 interface HeaderProps {
@@ -118,9 +118,7 @@ export const Header = ({ onFocusNode, availableRepos = [], onSwitchRepo }: Heade
       <div className="flex items-center gap-4">
         {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 flex items-center justify-center bg-gradient-to-br from-accent to-node-interface rounded-md shadow-glow text-white text-sm font-bold">
-            ◇
-          </div>
+          <img src="/logo.png" alt="Qode" className="w-7 h-7 rounded-md shadow-glow" />
           <span className="font-semibold text-[15px] tracking-tight">Qode</span>
         </div>
 
@@ -216,7 +214,7 @@ export const Header = ({ onFocusNode, availableRepos = [], onSwitchRepo }: Heade
                     {/* Node type indicator */}
                     <span
                       className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: NODE_TYPE_COLORS[node.label] || '#6b7280' }}
+                      style={{ backgroundColor: NODE_TYPE_COLORS[node.label] || '#404040' }}
                     />
                     {/* Node name */}
                     <span className="flex-1 truncate text-sm font-medium">
@@ -237,17 +235,17 @@ export const Header = ({ onFocusNode, availableRepos = [], onSwitchRepo }: Heade
       {/* Right section */}
       <div className="flex items-center gap-2">
         {/* GitHub Star Button */}
-        <a
-          href="https://github.com/abhigyanpatwari/Qode"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg text-white text-sm font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 group"
-        >
-          <Github className="w-4 h-4" />
-          <span className="hidden sm:inline">Star if cool</span>
-          <Star className="w-3.5 h-3.5 group-hover:fill-yellow-300 group-hover:text-yellow-300 transition-all" />
-          <span className="hidden sm:inline">✨</span>
-        </a>
+         <a
+           href="https://github.com/wurtz-codez/Qode"
+           target="_blank"
+           rel="noopener noreferrer"
+           className="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg text-white text-sm font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 group"
+         >
+           <Github className="w-4 h-4" />
+           <span className="hidden sm:inline">Star</span>
+           <Star className="w-3.5 h-3.5 group-hover:fill-yellow-300 group-hover:text-yellow-300 transition-all" />
+           <span className="hidden sm:inline">✨</span>
+         </a>
 
         {/* Stats */}
         {graph && (
@@ -284,7 +282,7 @@ export const Header = ({ onFocusNode, availableRepos = [], onSwitchRepo }: Heade
           `}
         >
           <Sparkles className="w-4 h-4" />
-          <span>Nexus AI</span>
+          <span>QodeAI</span>
         </button>
       </div>
     </header>

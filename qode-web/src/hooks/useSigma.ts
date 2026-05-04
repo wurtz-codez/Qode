@@ -31,7 +31,7 @@ const rgbToHex = (r: number, g: number, b: number): string => {
 // Dim a color by mixing with dark background (keeps color hint)
 const dimColor = (hex: string, amount: number): string => {
   const rgb = hexToRgb(hex);
-  const darkBg = { r: 18, g: 18, b: 28 }; // #12121c - dark background
+  const darkBg = { r: 10, g: 10, b: 10 }; // #0a0a0a - dark background
   return rgbToHex(
     darkBg.r + (rgb.r - darkBg.r) * amount,
     darkBg.g + (rgb.g - darkBg.g) * amount,
@@ -202,13 +202,13 @@ export const useSigma = (options: UseSigmaOptions = {}): UseSigmaReturn => {
       labelFont: 'JetBrains Mono, monospace',
       labelSize: 11,
       labelWeight: '500',
-      labelColor: { color: '#e4e4ed' },
+      labelColor: { color: '#ffffff' },
       labelRenderedSizeThreshold: 8,
       labelDensity: 0.1,
       labelGridCellSize: 70,
 
-      defaultNodeColor: '#6b7280',
-      defaultEdgeColor: '#2a2a3a',
+      defaultNodeColor: '#d4d4d4',
+      defaultEdgeColor: '#404040',
 
       defaultEdgeType: 'curved',
       edgeProgramClasses: {
@@ -237,18 +237,18 @@ export const useSigma = (options: UseSigmaOptions = {}): UseSigmaReturn => {
         const radius = 4;
 
         // Dark background pill
-        context.fillStyle = '#12121c';
+        context.fillStyle = '#171717';
         context.beginPath();
         context.roundRect(x - width / 2, y - height / 2, width, height, radius);
         context.fill();
 
         // Border matching node color
-        context.strokeStyle = data.color || '#6366f1';
+        context.strokeStyle = data.color || '#a3a3a3';
         context.lineWidth = 2;
         context.stroke();
 
         // Label text - light color
-        context.fillStyle = '#f5f5f7';
+        context.fillStyle = '#ffffff';
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         context.fillText(label, x, y);
@@ -256,7 +256,7 @@ export const useSigma = (options: UseSigmaOptions = {}): UseSigmaReturn => {
         // Also draw a subtle glow ring around the node
         context.beginPath();
         context.arc(data.x, data.y, nodeSize + 4, 0, Math.PI * 2);
-        context.strokeStyle = data.color || '#6366f1';
+        context.strokeStyle = data.color || '#a3a3a3';
         context.lineWidth = 2;
         context.globalAlpha = 0.5;
         context.stroke();
@@ -299,7 +299,7 @@ export const useSigma = (options: UseSigmaOptions = {}): UseSigmaReturn => {
             // Cyan pulse for search results
             const sizeMultiplier = 1.5 + phase * 0.8;
             res.size = (data.size || 8) * sizeMultiplier;
-            res.color = phase > 0.5 ? '#06b6d4' : brightenColor('#06b6d4', 1.3);
+            res.color = phase > 0.5 ? '#e5e5e5' : brightenColor('#e5e5e5', 1.3);
             res.zIndex = 5;
             res.highlighted = true;
           } else if (animation.type === 'ripple') {
@@ -330,7 +330,7 @@ export const useSigma = (options: UseSigmaOptions = {}): UseSigmaReturn => {
             res.highlighted = true;
           } else if (isQueryHighlighted) {
             // Regular cyan highlight for non-blast-radius nodes
-            res.color = '#06b6d4';
+            res.color = '#e5e5e5';
             res.size = (data.size || 8) * 1.4;
             res.zIndex = 2;
             res.highlighted = true;
@@ -344,7 +344,7 @@ export const useSigma = (options: UseSigmaOptions = {}): UseSigmaReturn => {
 
         if (hasHighlights && !currentSelected) {
           if (isQueryHighlighted) {
-            res.color = '#06b6d4';
+            res.color = '#e5e5e5';
             res.size = (data.size || 8) * 1.6;
             res.zIndex = 2;
             res.highlighted = true;
@@ -416,12 +416,12 @@ export const useSigma = (options: UseSigmaOptions = {}): UseSigmaReturn => {
               if (blastRadius.has(source) && blastRadius.has(target)) {
                 res.color = '#ef4444';
               } else {
-                res.color = '#06b6d4';
+                res.color = '#e5e5e5';
               }
               res.size = Math.max(2, (data.size || 1) * 3);
               res.zIndex = 2;
             } else if (oneHighlighted) {
-              res.color = dimColor('#06b6d4', 0.4);
+              res.color = dimColor('#e5e5e5', 0.4);
               res.size = 1;
               res.zIndex = 1;
             } else {

@@ -308,7 +308,7 @@ export const DropZone = ({ onFileSelect, onGitClone, onServerConnect }: DropZone
         {activeTab === 'github' && (
           <div className="p-8 bg-surface border border-border-default rounded-3xl">
             {/* Icon */}
-            <div className="mx-auto w-20 h-20 mb-6 flex items-center justify-center bg-gradient-to-br from-[#333] to-[#24292e] rounded-2xl shadow-lg">
+            <div className="mx-auto w-20 h-20 mb-6 flex items-center justify-center bg-gradient-to-br from-[#0a0a0a] to-[#171717] rounded-2xl shadow-lg">
               <Github className="w-10 h-10 text-white" />
             </div>
 
