@@ -1,100 +1,84 @@
 # Qode
 
-> **Local-first, multi-agent code archaeology and intelligence system.**
+<div align="center">
 
-Qode ingests entire codebases — including massive, undocumented, or legacy systems — and reverse-engineers the complete architecture into an interactive, multi-dimensional knowledge graph. It runs **entirely on your machine**, never sending code to external servers.
+  <h2>Building the nervous system for visual codebase exploration.</h2>
 
----
+</div>
 
-## Features
+**Qode** indexes any codebase into a high-fidelity knowledge graph — mapping dependencies, execution flows, and architectures — giving you true structural awareness so you never miss critical context when exploring or modifying code.
 
-- 🔍 **Structural Mapping** — discovers every file, class, function, and their relationships
-- 📝 **Semantic Documentation** — generates natural language explanations for undocumented code
-- 🔬 **Code Quality Forensics** — detects anti-patterns, calculates technical debt score (0–100)
-- 🔒 **Security Analysis** — OWASP Top 10, secrets detection, taint analysis
-- 💥 **Impact Prediction** — answers "if I change X, what breaks?" via graph traversal
-- 🌐 **Interactive Visualization** — Sigma.js WebGL graph handles 50K+ nodes
-- 🔒 **Privacy-first** — 100% local; Ollama support for fully offline analysis
+> *Smarter than basic code search.* Traditional search just finds text. Qode lets you *analyze* the architecture — tracking relationships, dependencies, and complex data flows, directly in your browser.
+
+**TL;DR:** The **Qode Web UI** offers a visual, interactive graph explorer and AI chat interface. It runs entirely in your browser using WebAssembly (WASM), allowing you to drop a zipped codebase into the app and instantly explore its complete architectural map without uploading your code to any external server.
+
+*(Note: The CLI tooling for AI Agent integrations is currently undergoing maintenance and has been temporarily removed from this documentation. Please use the Web UI for codebase exploration.)*
 
 ---
 
-## Quick Start
+## 🌟 What does it do?
 
-```bash
-pip install qode
-cd /path/to/your-project
-qode analyze .
-```
+Qode builds a complete knowledge graph of your codebase through a multi-phase indexing pipeline, entirely on the client side:
 
----
+1. **Structure** — Walks the file tree and maps folder/file relationships.
+2. **Parsing** — Extracts functions, classes, methods, and interfaces using Tree-sitter ASTs.
+3. **Resolution** — Resolves imports and function calls across files with language-aware logic.
+4. **Clustering** — Groups related symbols into functional communities.
+5. **Processes** — Traces execution flows from entry points through call chains.
+6. **Search** — Builds search indexes for fast retrieval and AI context.
 
-## Installation (Development)
-
-```bash
-git clone https://github.com/koustubhpande/qode
-cd qode
-make install          # creates .venv, installs deps + pre-commit hooks
-cp .env.example .env  # add your API keys
-```
+### Supported Languages
+TypeScript, JavaScript, Python, Java, Kotlin, C, C++, C#, Go, Rust, PHP, Swift
 
 ---
 
-## CLI Commands
+## 🚀 How to Use It
 
-| Command | Description |
-|---|---|
-| `qode analyze <path>` | Full analysis (Explorer → Analyst → Security → Test → Documenter) |
-| `qode docs <path>` | Documentation generation only |
-| `qode security <path>` | Security analysis only |
-| `qode graph <path>` | Build knowledge graph + open visualization |
-| `qode gate <path>` | CI/CD mode: pass/fail with thresholds |
-| `qode audit <path>` | CI/CD mode: full report, no gating |
-| `qode config` | Open `.qode.toml` in default editor |
+The project currently operates via a powerful, browser-based Web UI. No server installation is required — your code never leaves the browser.
 
----
+### Running Locally
 
-## Technology Stack
+1. **Navigate to the web application folder:**
+   ```bash
+   cd qode-web
+   ```
 
-| Layer | Technology |
-|---|---|
-| CLI | Python (Typer + Rich) |
-| Parser | py-tree-sitter (12 languages) |
-| Core Engine | Python (multiprocessing + asyncio) |
-| Agent Orchestration | LangGraph |
-| LLM (default) | Gemini 2.0 Flash |
-| Embeddings | all-MiniLM-L6-v2 (local) |
-| Database | KuzuDB (graph + vectors + FTS) |
-| Backend API | FastAPI |
-| Frontend | Vite + React 18 + Sigma.js + Tailwind v4 |
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+4. **Explore your code:**
+   - Open [http://localhost:5173](http://localhost:5173) in your browser.
+   - Drag & drop a `.zip` file of any supported codebase into the dropzone.
+   - Qode will locally analyze, index, and render a rich 2D graph of your architecture!
 
 ---
 
-## Development
+## 🛠️ What is used in this project? (Tech Stack)
 
-```bash
-make lint        # ruff check
-make format      # black + ruff --fix
-make typecheck   # pyright
-make test        # pytest
-make pre-commit  # run all pre-commit hooks
-make audit       # pip-audit security check
-```
+Qode achieves high-performance local indexing by leveraging WebAssembly and WebGL:
 
----
-
-## Project Status
-
-**Phase 1 — Foundation (In Progress)**
-
-- [x] Project skeleton: `pyproject.toml`, `src/qode/`, `tests/`, pre-commit hooks
-- [ ] Core parsers + ingestion pipeline
-- [ ] KuzuDB schema + adapter
-- [ ] CLI skeleton (`qode analyze`)
-
-See [Qode-documentation.md](Qode-documentation.md) for the full PRD.
+| Category            | Technology                                    |
+| ------------------- | --------------------------------------------- |
+| **Frontend**        | React 18, TypeScript, Vite, Tailwind v4       |
+| **Visualization**   | Sigma.js + Graphology (WebGL)                 |
+| **Parsing**         | Tree-sitter (WASM)                            |
+| **Database**        | KuzuDB (WASM - Embedded graph database)       |
+| **Embeddings/ML**   | HuggingFace transformers.js (WebGPU/WASM)     |
+| **Agent Interface** | LangChain ReAct agent                         |
+| **Clustering**      | Graphology (Louvain/Leiden algorithms)        |
+| **Concurrency**     | Web Workers + Comlink (for non-blocking UI)   |
 
 ---
 
-## License
+## 🔒 Security & Privacy
 
-MIT © Koustubh Pande
+- **Everything runs in your browser.** No code is uploaded to any server.
+- File parsing, graph creation, and search indexing happen entirely locally via WebAssembly.
+- API keys (if provided for the AI chat) are stored securely in your browser's local storage only.
