@@ -17,8 +17,8 @@ const initFS = () => {
   return fsName;
 };
 
-// Hosted proxy URL - use this for localhost to avoid local proxy issues
-const HOSTED_PROXY_URL = 'https://qode.vercel.app/api/proxy';
+// Hosted proxy URL - use public isomorphic-git proxy for local dev
+const HOSTED_PROXY_URL = 'https://cors.isomorphic-git.org';
 
 /**
  * Custom HTTP client that uses a query-param based proxy
