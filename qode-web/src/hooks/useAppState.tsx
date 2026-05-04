@@ -14,7 +14,7 @@ import { DEFAULT_VISIBLE_EDGES, type EdgeType } from '../lib/constants';
 import type { RepoSummary, ConnectToServerResult } from '../services/server-connection';
 import { fetchRepos, connectToServer } from '../services/server-connection';
 
-export type ViewMode = 'onboarding' | 'loading' | 'exploring';
+export type ViewMode = 'landing' | 'onboarding' | 'loading' | 'exploring';
 export type RightPanelTab = 'code' | 'chat';
 export type EmbeddingStatus = 'idle' | 'loading' | 'embedding' | 'indexing' | 'ready' | 'error';
 
@@ -175,7 +175,9 @@ const AppStateContext = createContext<AppState | null>(null);
 
 export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   // View state
-  const [viewMode, setViewMode] = useState<ViewMode>('onboarding');
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    typeof window !== 'undefined' && window.location.pathname === '/app' ? 'onboarding' : 'landing'
+  );
 
   // Graph data
   const [graph, setGraph] = useState<KnowledgeGraph | null>(null);

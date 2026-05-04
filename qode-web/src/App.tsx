@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { AppStateProvider, useAppState } from './hooks/useAppState';
+import { LandingPage } from './components/LandingPage';
 import { DropZone } from './components/DropZone';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import { Header } from './components/Header';
@@ -240,6 +241,10 @@ const AppContent = () => {
   }, [refreshLLMSettings, initializeAgent]);
 
   // Render based on view mode
+  if (viewMode === 'landing') {
+    return <LandingPage onContinue={() => setViewMode('onboarding')} />;
+  }
+
   if (viewMode === 'onboarding') {
     return (
       <DropZone
