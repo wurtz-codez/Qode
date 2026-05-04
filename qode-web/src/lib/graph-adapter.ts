@@ -276,16 +276,14 @@ export const knowledgeGraphToGraphology = (
   // Add edges with distinct colors per relationship type
   const edgeBaseSize = nodeCount > 20000 ? 0.4 : nodeCount > 5000 ? 0.6 : 1.0;
 
-  // Edge styles - each relationship type has a DISTINCT color for clarity
-  // Using varied hues so relationships are easily distinguishable
+  // Edge styles — each relationship type has a DISTINCT vivid color
   const EDGE_STYLES: Record<string, { color: string; sizeMultiplier: number }> = {
-    // STRUCTURAL - Greens (folder/file hierarchy)
-    CONTAINS: { color: '#404040', sizeMultiplier: 0.4 },    // Forest green - folder contains
-    DEFINES: { color: '#e5e5e5', sizeMultiplier: 0.5 },     // Cyan - file defines function/class
-    IMPORTS: { color: '#d4d4d4', sizeMultiplier: 0.6 },     // Blue - file imports file
-    CALLS: { color: '#ffffff', sizeMultiplier: 0.8 },       // Violet - function calls
-    EXTENDS: { color: '#e5e5e5', sizeMultiplier: 1.0 },     // Orange - extension
-    IMPLEMENTS: { color: '#d4d4d4', sizeMultiplier: 0.9 },  // Pink - interface implementation
+    CONTAINS:    { color: '#4f46e5', sizeMultiplier: 0.4 },   // Indigo  - folder/file hierarchy (subtle)
+    DEFINES:     { color: '#2563eb', sizeMultiplier: 0.6 },   // Blue    - file defines symbol
+    IMPORTS:     { color: '#d97706', sizeMultiplier: 0.5 },   // Amber   - import dependency
+    CALLS:       { color: '#059669', sizeMultiplier: 0.8 },   // Emerald - function call edges
+    EXTENDS:     { color: '#ea580c', sizeMultiplier: 1.0 },   // Orange  - inheritance
+    IMPLEMENTS:  { color: '#db2777', sizeMultiplier: 0.9 },   // Pink    - interface implementation
   };
 
   knowledgeGraph.relationships.forEach((rel) => {
