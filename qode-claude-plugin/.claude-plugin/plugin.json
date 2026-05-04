@@ -1,0 +1,11 @@
+{
+  "name": "qode",
+  "description": "Code intelligence powered by a knowledge graph. Provides execution flow tracing, blast radius analysis, and augmented search across your codebase.",
+  "version": "1.3.6",
+  "author": {
+    "name": "Qode"
+  },
+  "homepage": "https://github.com/abhigyanpatwari/Qode",
+  "repository": "https://github.com/abhigyanpatwari/Qode",
+  "keywords": ["code-intelligence", "knowledge-graph", "mcp", "static-analysis"]
+}

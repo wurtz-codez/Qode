@@ -1,6 +1,6 @@
 """Entry-point scoring algorithm.
 
-Ported from GitNexus ``entry-point-scoring.ts`` (~331 lines → Python).
+Ported from Qode ``entry-point-scoring.ts`` (~331 lines → Python).
 Scores each entity by likelihood of being an execution entry point.
 """
 

@@ -1,6 +1,6 @@
 """BFS execution flow tracing.
 
-Ported from GitNexus ``process-processor.ts`` (~300 lines → Python).
+Ported from Qode ``process-processor.ts`` (~300 lines → Python).
 Traces execution paths from entry points via BFS over the call graph.
 """
 

@@ -1,6 +1,6 @@
 """Directory tree structure processor.
 
-Ported from GitNexus ``structure-processor.ts`` (~150 lines → Python).
+Ported from Qode ``structure-processor.ts`` (~150 lines → Python).
 """
 
 from __future__ import annotations

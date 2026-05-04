@@ -1,6 +1,6 @@
 """Ignore-pattern service (.gitignore + .qodeignore).
 
-Ported from GitNexus ``ignore-service.ts`` (~239 lines → Python).
+Ported from Qode ``ignore-service.ts`` (~239 lines → Python).
 Uses ``pathspec`` for gitignore-style glob matching.
 """
 

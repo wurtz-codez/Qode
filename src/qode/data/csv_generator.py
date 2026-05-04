@@ -1,6 +1,6 @@
 """Streaming CSV generator for bulk KuzuDB ingestion.
 
-Ported from GitNexus ``kuzu/csv-generator.ts`` (~300 lines → Python).
+Ported from Qode ``kuzu/csv-generator.ts`` (~300 lines → Python).
 """
 
 from __future__ import annotations

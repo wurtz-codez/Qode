@@ -1,6 +1,6 @@
 """Leiden community detection for graph clustering.
 
-Ported from GitNexus ``vendor/leiden/`` (~747 lines → Python).
+Ported from Qode ``vendor/leiden/`` (~747 lines → Python).
 Groups related nodes into communities for visual coloring in Sigma.js.
 """
 

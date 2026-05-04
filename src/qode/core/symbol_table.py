@@ -1,6 +1,6 @@
 """Dual-index symbol lookup table (FQN + suffix).
 
-Ported from GitNexus ``symbol-table.ts`` (~80 lines TypeScript → ~250 lines
+Ported from Qode ``symbol-table.ts`` (~80 lines TypeScript → ~250 lines
 Python), enhanced with Python best practices, thorough typing, docstrings,
 and a dual-index design:
 

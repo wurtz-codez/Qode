@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "qode": {
+      "command": "npx",
+      "args": ["-y", "qode@latest", "mcp"]
+    }
+  }
+}

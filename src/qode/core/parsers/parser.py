@@ -1,6 +1,6 @@
 """py-tree-sitter parsing engine.
 
-Ported from GitNexus ``workers/parse-worker.ts`` (~1316 lines → Python).
+Ported from Qode ``workers/parse-worker.ts`` (~1316 lines → Python).
 Parses source files into CSTs and extracts all entities using S-expression
 queries.  Runs in parallel via ``multiprocessing.Pool``.
 
@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 _MAX_FILE_BYTES = 512 * 1024  # 512 KB — skip files larger than this
 
 # ---------------------------------------------------------------------------
-# Language registry  (GitNexus parse-worker.ts lines ~90-143)
+# Language registry  (Qode parse-worker.ts lines ~90-143)
 # ---------------------------------------------------------------------------
 
 
@@ -123,7 +123,7 @@ def _get_language(name: str) -> Language | None:
 
 
 # ---------------------------------------------------------------------------
-# ID generation  (GitNexus parse-worker.ts ``generateId``)
+# ID generation  (Qode parse-worker.ts ``generateId``)
 # ---------------------------------------------------------------------------
 
 
@@ -146,7 +146,7 @@ def generate_id(label: str, key: str) -> str:
 
 # ---------------------------------------------------------------------------
 # Built-in names to exclude from call graphs
-# (GitNexus parse-worker.ts lines 338-448)
+# (Qode parse-worker.ts lines 338-448)
 # ---------------------------------------------------------------------------
 
 BUILT_INS: frozenset[str] = frozenset(
@@ -835,7 +835,7 @@ BUILT_INS: frozenset[str] = frozenset(
 )
 
 # ---------------------------------------------------------------------------
-# Function node types  (GitNexus parse-worker.ts lines 269-281)
+# Function node types  (Qode parse-worker.ts lines 269-281)
 # ---------------------------------------------------------------------------
 
 FUNCTION_NODE_TYPES: frozenset[str] = frozenset(
@@ -863,7 +863,7 @@ FUNCTION_NODE_TYPES: frozenset[str] = frozenset(
 
 
 # ---------------------------------------------------------------------------
-# Capture → label mapping  (GitNexus parse-worker.ts lines 454-482)
+# Capture → label mapping  (Qode parse-worker.ts lines 454-482)
 # ---------------------------------------------------------------------------
 
 _CAPTURE_LABEL_MAP: dict[str, str] = {
@@ -915,7 +915,7 @@ def get_label_from_captures(
 
 
 # ---------------------------------------------------------------------------
-# Definition capture keys  (GitNexus parse-worker.ts lines 484-507)
+# Definition capture keys  (Qode parse-worker.ts lines 484-507)
 # ---------------------------------------------------------------------------
 
 DEFINITION_CAPTURE_KEYS: tuple[str, ...] = (
@@ -945,7 +945,7 @@ DEFINITION_CAPTURE_KEYS: tuple[str, ...] = (
 
 
 # ---------------------------------------------------------------------------
-# Definition node extractor  (GitNexus parse-worker.ts lines 509-514)
+# Definition node extractor  (Qode parse-worker.ts lines 509-514)
 # ---------------------------------------------------------------------------
 
 
@@ -967,7 +967,7 @@ def get_definition_node(
 
 
 # ---------------------------------------------------------------------------
-# Export detection  (GitNexus parse-worker.ts lines 145-263)
+# Export detection  (Qode parse-worker.ts lines 145-263)
 # ---------------------------------------------------------------------------
 
 
@@ -1106,7 +1106,7 @@ def _has_modifier(node: Node, modifier: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Enclosing function lookup  (GitNexus parse-worker.ts lines 284-336)
+# Enclosing function lookup  (Qode parse-worker.ts lines 284-336)
 # ---------------------------------------------------------------------------
 
 
@@ -1151,7 +1151,7 @@ def find_enclosing_function_id(
 
 
 # ---------------------------------------------------------------------------
-# Single-file parse  (GitNexus parse-worker.ts ``processFileGroup``
+# Single-file parse  (Qode parse-worker.ts ``processFileGroup``
 #   lines 1089-1257)
 # ---------------------------------------------------------------------------
 
@@ -1517,7 +1517,7 @@ def _extract_definition(
 
 
 # ---------------------------------------------------------------------------
-# Batch parse  (GitNexus parse-worker.ts ``processBatch`` lines 533-612)
+# Batch parse  (Qode parse-worker.ts ``processBatch`` lines 533-612)
 # ---------------------------------------------------------------------------
 
 

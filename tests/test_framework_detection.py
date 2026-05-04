@@ -7,7 +7,7 @@ Covers:
 - FRAMEWORK_AST_PATTERNS dict completeness
 - Edge cases (empty strings, Windows paths, very long paths)
 
-Ported from GitNexus ``framework-detection.test.ts`` with additional
+Ported from Qode ``framework-detection.test.ts`` with additional
 Python-specific and extended coverage for Kotlin, Laravel, Swift, Go,
 Rust, C/C++, and AST edge cases.
 """

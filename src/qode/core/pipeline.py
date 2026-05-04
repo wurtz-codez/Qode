@@ -1,6 +1,6 @@
 """6-phase ingestion pipeline orchestrator.
 
-Ported from GitNexus ``pipeline.ts`` (~375 lines → Python).
+Ported from Qode ``pipeline.ts`` (~375 lines → Python).
 Phases:
   1. File discovery (walker + ignore)
   2. Structure (directory tree processing)

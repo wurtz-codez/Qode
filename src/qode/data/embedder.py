@@ -1,6 +1,6 @@
 """all-MiniLM-L6-v2 embedding engine (local, CPU inference).
 
-Ported from GitNexus ``embeddings/`` (~500 lines → Python).
+Ported from Qode ``embeddings/`` (~500 lines → Python).
 Produces 384-dimensional vectors stored in KuzuDB's native HNSW index.
 """
 

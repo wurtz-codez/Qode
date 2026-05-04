@@ -1,6 +1,6 @@
 """EXTENDS / IMPLEMENTS heritage extraction.
 
-Ported from GitNexus ``heritage-processor.ts`` (~200 lines → Python).
+Ported from Qode ``heritage-processor.ts`` (~200 lines → Python).
 """
 
 from __future__ import annotations
