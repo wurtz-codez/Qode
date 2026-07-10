@@ -1,84 +1,168 @@
-# Qode
-
 <div align="center">
-
-  <h2>Building the nervous system for visual codebase exploration.</h2>
-
+  <img src="https://qode-beta.vercel.app/logo.png" alt="Qode Logo" width="120" height="120" />
+  <h1>Qode</h1>
+  <p>
+    <strong>Visual codebase intelligence — explore any codebase as an interactive knowledge graph, directly in your browser.</strong>
+  </p>
+  <p>
+    <a href="https://qode-beta.vercel.app" target="_blank">
+      <img src="https://img.shields.io/badge/Try%20the%20Live%20App-qode--beta.vercel.app-blue?style=for-the-badge&logo=vercel" alt="Live App" />
+    </a>
+    <a href="https://www.npmjs.com/package/qode">
+      <img src="https://img.shields.io/npm/v/qode.svg?style=for-the-badge" alt="npm version" />
+    </a>
+    <a href="https://polyformproject.org/licenses/noncommercial/1.0.0/">
+      <img src="https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg?style=for-the-badge" alt="License" />
+    </a>
+  </p>
 </div>
 
-**Qode** indexes any codebase into a high-fidelity knowledge graph — mapping dependencies, execution flows, and architectures — giving you true structural awareness so you never miss critical context when exploring or modifying code.
+---
 
-> *Smarter than basic code search.* Traditional search just finds text. Qode lets you *analyze* the architecture — tracking relationships, dependencies, and complex data flows, directly in your browser.
+## What is Qode?
 
-**TL;DR:** The **Qode Web UI** offers a visual, interactive graph explorer and AI chat interface. It runs entirely in your browser using WebAssembly (WASM), allowing you to drop a zipped codebase into the app and instantly explore its complete architectural map without uploading your code to any external server.
+Qode turns any codebase into a **visual knowledge graph**. Drop in a `.zip` of your repository (or point it at a GitHub repo), and Qode parses every file, maps every function call, import, and class dependency, and renders it all as an interactive 2D graph — right in your browser, with **zero code ever leaving your machine**.
 
-*(Note: The CLI tooling for AI Agent integrations is currently undergoing maintenance and has been temporarily removed from this documentation. Please use the Web UI for codebase exploration.)*
+It's code search, but smarter. Instead of grepping for text, you can:
+- **See** the full architecture as a navigable graph
+- **Trace** execution flows from entry points through call chains
+- **Search** across symbols, files, and relationships with hybrid BM25 + semantic search
+- **Chat** with an AI agent that has full awareness of your codebase structure
 
 ---
 
-## 🌟 What does it do?
+## Two Ways to Use
 
-Qode builds a complete knowledge graph of your codebase through a multi-phase indexing pipeline, entirely on the client side:
+### 1. Web UI (No Install) — [qode-beta.vercel.app](https://qode-beta.vercel.app)
 
-1. **Structure** — Walks the file tree and maps folder/file relationships.
-2. **Parsing** — Extracts functions, classes, methods, and interfaces using Tree-sitter ASTs.
-3. **Resolution** — Resolves imports and function calls across files with language-aware logic.
-4. **Clustering** — Groups related symbols into functional communities.
-5. **Processes** — Traces execution flows from entry points through call chains.
-6. **Search** — Builds search indexes for fast retrieval and AI context.
+The browser app runs 100% client-side — no uploads, no servers. Drag & drop a `.zip` or connect a GitHub repo and start exploring instantly.
 
-### Supported Languages
-TypeScript, JavaScript, Python, Java, Kotlin, C, C++, C#, Go, Rust, PHP, Swift
+### 2. CLI / MCP (For AI Agents)
 
----
+```bash
+# Install globally
+npm install -g qode
 
-## 🚀 How to Use It
+# Index any repository
+qode analyze
 
-The project currently operates via a powerful, browser-based Web UI. No server installation is required — your code never leaves the browser.
+# Or run without installing
+npx qode analyze
+```
 
-### Running Locally
-
-1. **Navigate to the web application folder:**
-   ```bash
-   cd qode-web
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
-
-4. **Explore your code:**
-   - Open [http://localhost:5173](http://localhost:5173) in your browser.
-   - Drag & drop a `.zip` file of any supported codebase into the dropzone.
-   - Qode will locally analyze, index, and render a rich 2D graph of your architecture!
+Works with **Cursor**, **Claude Code**, **Windsurf**, **Cline**, **OpenCode**, and any MCP-compatible AI agent.
 
 ---
 
-## 🛠️ What is used in this project? (Tech Stack)
+## Quick Start — Web UI
 
-Qode achieves high-performance local indexing by leveraging WebAssembly and WebGL:
+| Step | Action |
+|------|--------|
+| 1 | Open **[qode-beta.vercel.app](https://qode-beta.vercel.app)** |
+| 2 | Drop a `.zip` of your codebase (or clone via GitHub URL) |
+| 3 | Wait seconds — Qode indexes locally in your browser via WebAssembly |
+| 4 | Explore the interactive graph, search symbols, trace flows, chat with AI |
 
-| Category            | Technology                                    |
-| ------------------- | --------------------------------------------- |
-| **Frontend**        | React 18, TypeScript, Vite, Tailwind v4       |
-| **Visualization**   | Sigma.js + Graphology (WebGL)                 |
-| **Parsing**         | Tree-sitter (WASM)                            |
-| **Database**        | KuzuDB (WASM - Embedded graph database)       |
-| **Embeddings/ML**   | HuggingFace transformers.js (WebGPU/WASM)     |
-| **Agent Interface** | LangChain ReAct agent                         |
-| **Clustering**      | Graphology (Louvain/Leiden algorithms)        |
-| **Concurrency**     | Web Workers + Comlink (for non-blocking UI)   |
+## Quick Start — CLI
+
+```bash
+# Index your current repository
+npx qode analyze
+
+# Start the MCP server for AI agent integration
+npx qode mcp
+```
+
+```bash
+# Or serve a local HTTP API + UI
+qode serve
+```
 
 ---
 
-## 🔒 Security & Privacy
+## Features
 
-- **Everything runs in your browser.** No code is uploaded to any server.
-- File parsing, graph creation, and search indexing happen entirely locally via WebAssembly.
-- API keys (if provided for the AI chat) are stored securely in your browser's local storage only.
+| Feature | Description |
+|---------|-------------|
+| **Knowledge Graph** | Full dependency graph of functions, classes, imports, and call chains |
+| **Visual Explorer** | Interactive 2D graph with pan, zoom, filter, and cluster navigation |
+| **Execution Flows** | Trace entry-point-to-exit call chains across files |
+| **Hybrid Search** | BM25 + semantic embeddings + RRF fusion for pinpoint symbol lookup |
+| **AI Chat** | LangChain ReAct agent with full graph context — ask questions about your code |
+| **Multi-Language** | TypeScript, JavaScript, Python, Java, Kotlin, C, C++, C#, Go, Rust, PHP, Swift |
+| **100% Local** | WebAssembly-powered parsing — your code never touches a server |
+
+---
+
+## Tech Stack
+
+| Category | Technology |
+|----------|-----------|
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS v4 |
+| **Graph Rendering** | Sigma.js + Graphology (WebGL) |
+| **Parsing** | Tree-sitter (WASM) |
+| **Database** | KuzuDB WASM (embedded graph database) |
+| **Embeddings** | HuggingFace Transformers.js (WebGPU / WASM) |
+| **AI Agent** | LangChain ReAct agent |
+| **Clustering** | Louvain / Leiden community detection |
+| **Concurrency** | Web Workers + Comlink |
+
+---
+
+## Demo
+
+```
+[ Drag & drop a codebase → instant graph visualization ]
+
+     ┌─────────────────────────────────┐
+     │         Your Codebase           │
+     │  ┌───┐  ┌───┐  ┌───┐  ┌───┐   │
+     │  │ F │──│ G │──│ H │──│ I │   │
+     │  └───┘  └───┘  └───┘  └───┘   │
+     │    │      │              │      │
+     │  ┌───┐  ┌───┐          ┌───┐   │
+     │  │ J │  │ K │          │ L │   │
+     │  └───┘  └───┘          └───┘   │
+     └─────────────────────────────────┘
+```
+
+---
+
+## CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `qode analyze [path]` | Index a repository |
+| `qode analyze --force` | Force full re-index |
+| `qode mcp` | Start MCP server (stdio) |
+| `qode serve` | Start HTTP server + web UI |
+| `qode list` | List all indexed repositories |
+| `qode status` | Show index status |
+| `qode clean` | Delete current index |
+| `qode wiki [path]` | Generate docs from knowledge graph |
+
+---
+
+## Requirements
+
+- **Web UI:** Any modern browser (Chrome, Firefox, Safari, Edge)
+- **CLI:** Node.js >= 18, Git repository
+
+---
+
+## Privacy & Security
+
+- **100% client-side** in the Web UI — your code never leaves your browser
+- All parsing, indexing, and graph building happens locally via WebAssembly
+- The CLI stores indexes locally in `.qode/` (automatically gitignored)
+- No telemetry, no analytics, no data collection
+
+---
+
+## License
+
+[PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/) — free for non-commercial use.
+
+<p align="center">
+  <a href="https://qode-beta.vercel.app" target="_blank"><strong>Try Qode now →</strong></a>
+</p>
